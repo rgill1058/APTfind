@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>List Your Community — AptFind</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sand: #f5f0e8;
+  --cream: #faf8f4;
+  --charcoal: #1c1c1e;
+  --charcoal-2: #2a2825;
+  --warm-gray: #6b6460;
+  --warm-gray-light: #9b9490;
+  --gold: #c9a84c;
+  --gold-light: #e8d5a3;
+  --gold-pale: #f7f0de;
+  --rust: #b85c38;
+  --white: #ffffff;
+  --border: #e2ddd6;
+  --border-dark: #d0c9bf;
+  --green: #2d7a5f;
+  --green-light: #e8f5f0;
+  --shadow-sm: 0 1px 4px rgba(28,28,30,0.06);
+  --shadow-md: 0 4px 20px rgba(28,28,30,0.1);
+  --shadow-lg: 0 12px 48px rgba(28,28,30,0.14);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,248,244,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--charcoal); text-decoration: none;
+}
+.nav-logo span { color: var(--gold); }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--warm-gray); text-decoration: none;
+  font-size: 0.875rem; font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-back:hover { color: var(--charcoal); }
+.nav-back svg { transition: transform 0.2s; }
+.nav-back:hover svg { transform: translateX(-3px); }
+
+/* ─── PROGRESS BAR ─── */
+.progress-wrap {
+  position: fixed; top: 64px; left: 0; right: 0; z-index: 99;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+}
+.progress-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center;
+  padding: 16px 0;
+  gap: 0;
+}
+.prog-step {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; position: relative; cursor: pointer;
+}
+.prog-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px; left: 50%; right: -50%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+  transition: background 0.4s;
+}
+.prog-step.completed:not(:last-child)::after { background: var(--gold); }
+
+.prog-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700;
+  color: var(--warm-gray);
+  position: relative; z-index: 1;
+  transition: all 0.3s;
+}
+.prog-step.active .prog-dot {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--charcoal);
+  box-shadow: 0 0 0 4px rgba(201,168,76,0.18);
+}
+.prog-step.completed .prog-dot {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--charcoal);
+}
+.prog-label {
+  font-size: 0.7rem; font-weight: 500;
+  color: var(--warm-gray);
+  margin-top: 5px; white-space: nowrap;
+  transition: color 0.3s;
+}
+.prog-step.active .prog-label { color: var(--charcoal); font-weight: 600; }
+.prog-step.completed .prog-label { color: var(--gold); }
+
+/* ─── MAIN LAYOUT ─── */
+.main {
+  padding-top: 148px;
+  padding-bottom: 80px;
+  min-height: 100vh;
+}
+
+/* ─── STEPS (shown/hidden) ─── */
+.step { display: none; }
+.step.active { display: block; animation: stepIn 0.4s ease both; }
+
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── STEP 1: PLAN SELECTION ─── */
+.plan-hero {
+  text-align: center;
+  padding: 48px 40px 0;
+  max-width: 640px; margin: 0 auto 48px;
+}
+.eyebrow {
+  font-size: 0.7rem; letter-spacing: 2.5px; text-transform: uppercase;
+  font-weight: 600; color: var(--gold); margin-bottom: 12px;
+}
+.plan-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; letter-spacing: -0.5px;
+  line-height: 1.15; margin-bottom: 14px;
+}
+.plan-hero h1 em { font-style: italic; color: var(--gold); }
+.plan-hero p { color: var(--warm-gray); font-size: 1rem; max-width: 440px; margin: 0 auto 28px; }
+
+/* billing toggle */
+.billing-toggle {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--sand);
+  border-radius: 30px; padding: 5px 6px 5px 16px;
+  font-size: 0.82rem; font-weight: 500; color: var(--warm-gray);
+}
+.toggle-btn {
+  position: relative;
+  width: 40px; height: 22px;
+  background: var(--border-dark);
+  border-radius: 11px; border: none; cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle-btn.on { background: var(--gold); }
+.toggle-btn::after {
+  content: '';
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: white; border-radius: 50%;
+  transition: transform 0.3s;
+}
+.toggle-btn.on::after { transform: translateX(18px); }
+.save-badge {
+  background: var(--green); color: white;
+  font-size: 0.65rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+/* plan cards */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1000px; margin: 0 auto;
+  padding: 0 40px 40px;
+}
+
+.plan-card {
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px 28px;
+  background: var(--white);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.plan-card:hover {
+  border-color: var(--gold-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+.plan-card.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(201,168,76,0.12), var(--shadow-md);
+}
+.plan-card.highlighted {
+  background: var(--charcoal);
+  border-color: var(--gold);
+  color: var(--white);
+}
+.plan-card.highlighted:hover { transform: translateY(-3px); }
+.plan-card.highlighted.selected {
+  box-shadow: 0 0 0 4px rgba(201,168,76,0.25), var(--shadow-lg);
+}
+
+.plan-popular {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: var(--charcoal);
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 4px 14px; border-radius: 20px;
+  white-space: nowrap;
+}
+.plan-tier {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
+}
+.plan-price-wrap { margin-bottom: 6px; }
+.plan-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.2rem; font-weight: 700; line-height: 1;
+}
+.plan-price sup { font-size: 1.4rem; vertical-align: top; margin-top: 10px; }
+.plan-period {
+  font-size: 0.78rem; color: var(--warm-gray); margin-bottom: 6px;
+}
+.plan-card.highlighted .plan-period { color: rgba(255,255,255,0.5); }
+.plan-annual-note {
+  font-size: 0.72rem; color: var(--green);
+  font-weight: 600; margin-bottom: 20px; min-height: 18px;
+}
+.plan-card.highlighted .plan-annual-note { color: #7dd3b0; }
+.plan-desc {
+  font-size: 0.82rem; color: var(--warm-gray);
+  margin-bottom: 20px; line-height: 1.5;
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+}
+.plan-card.highlighted .plan-desc { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.12); }
+.plan-features { list-style: none; margin-bottom: 26px; display: flex; flex-direction: column; gap: 10px; }
+.plan-features li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.845rem; line-height: 1.4;
+}
+.plan-features li .check {
+  width: 18px; height: 18px; flex-shrink: 0;
+  background: var(--gold-pale); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; color: var(--gold); font-weight: 900;
+  margin-top: 1px;
+}
+.plan-card.highlighted .plan-features li { color: rgba(255,255,255,0.82); }
+.plan-card.highlighted .check { background: rgba(201,168,76,0.2); }
+
+.plan-select-btn {
+  width: 100%; padding: 13px;
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  border: 2px solid var(--charcoal);
+  background: transparent; color: var(--charcoal);
+}
+.plan-card.highlighted .plan-select-btn {
+  background: var(--gold); border-color: var(--gold); color: var(--charcoal);
+}
+.plan-card.selected:not(.highlighted) .plan-select-btn {
+  background: var(--charcoal); color: var(--white);
+}
+.plan-card.highlighted.selected .plan-select-btn {
+  background: var(--gold); border-color: var(--gold);
+}
+.plan-select-btn:hover { opacity: 0.88; }
+
+/* comparison table */
+.compare-wrap {
+  max-width: 900px; margin: 0 auto 60px;
+  padding: 0 40px;
+}
+.compare-toggle {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--warm-gray); font-size: 0.875rem; font-weight: 500;
+  cursor: pointer; border: none; background: none;
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 20px; padding: 0;
+  transition: color 0.2s;
+}
+.compare-toggle:hover { color: var(--charcoal); }
+.compare-toggle .arrow { transition: transform 0.3s; }
+.compare-toggle.open .arrow { transform: rotate(180deg); }
+
+.compare-table {
+  width: 100%; border-collapse: collapse;
+  display: none;
+  animation: stepIn 0.3s ease both;
+}
+.compare-table.visible { display: table; }
+.compare-table th, .compare-table td {
+  padding: 12px 16px;
+  text-align: left; font-size: 0.84rem;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th {
+  font-weight: 700; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--warm-gray);
+  background: var(--sand);
+}
+.compare-table th:not(:first-child) { text-align: center; }
+.compare-table td:not(:first-child) { text-align: center; }
+.compare-table tr:hover td { background: var(--sand); }
+.check-y { color: var(--gold); font-weight: 700; }
+.check-n { color: var(--border-dark); }
+.compare-table .plan-col { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 600; }
+
+/* step nav button */
+.step-nav {
+  display: flex; justify-content: center; gap: 14px;
+  padding: 0 40px;
+}
+.btn-next {
+  background: var(--charcoal); color: var(--white);
+  border: none; border-radius: 9px;
+  padding: 16px 48px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 10px;
+}
+.btn-next:hover { background: var(--gold); color: var(--charcoal); }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-next:disabled:hover { background: var(--charcoal); color: var(--white); }
+.btn-back-step {
+  background: transparent; color: var(--warm-gray);
+  border: 2px solid var(--border); border-radius: 9px;
+  padding: 14px 28px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-back-step:hover { border-color: var(--charcoal); color: var(--charcoal); }
+
+/* ─── STEP 2: ACCOUNT ─── */
+.form-container {
+  max-width: 600px; margin: 0 auto;
+  padding: 48px 40px;
+}
+.step-heading { margin-bottom: 32px; }
+.step-heading h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 700;
+  letter-spacing: -0.3px; margin-bottom: 8px;
+}
+.step-heading p { color: var(--warm-gray); font-size: 0.9rem; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-size: 0.8rem; font-weight: 600;
+  color: var(--charcoal); margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.field label .req { color: var(--rust); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; color: var(--charcoal);
+  background: var(--white);
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+}
+.field input::placeholder, .field textarea::placeholder { color: #bbb; }
+.field textarea { resize: vertical; min-height: 90px; }
+.field .hint { font-size: 0.75rem; color: var(--warm-gray-light); margin-top: 5px; }
+
+.form-divider {
+  display: flex; align-items: center; gap: 14px;
+  margin: 24px 0;
+  color: var(--warm-gray); font-size: 0.8rem;
+}
+.form-divider::before, .form-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.social-signin {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 24px;
+}
+.social-btn {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 11px 16px;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  background: var(--white); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+  color: var(--charcoal); transition: all 0.2s;
+}
+.social-btn:hover { border-color: var(--charcoal); background: var(--sand); }
+
+.password-wrap { position: relative; }
+.password-toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--warm-gray); font-size: 0.8rem; font-weight: 500;
+}
+.terms-note {
+  font-size: 0.75rem; color: var(--warm-gray);
+  text-align: center; margin-top: 16px; line-height: 1.6;
+}
+.terms-note a { color: var(--charcoal); text-decoration: underline; }
+
+/* ─── STEP 3: COMMUNITY DETAILS ─── */
+.details-layout {
+  max-width: 900px; margin: 0 auto;
+  padding: 48px 40px;
+  display: grid; grid-template-columns: 1.6fr 1fr;
+  gap: 40px; align-items: start;
+}
+.details-form {}
+.details-sidebar {
+  position: sticky; top: 160px;
+}
+
+/* amenity checkboxes */
+.amenity-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-top: 6px;
+}
+.amenity-check {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 0.82rem; font-weight: 500; color: var(--warm-gray);
+  user-select: none;
+}
+.amenity-check:hover { border-color: var(--gold-light); color: var(--charcoal); }
+.amenity-check.checked {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+  color: var(--charcoal);
+}
+.amenity-check input[type="checkbox"] { display: none; }
+.amenity-icon { font-size: 1rem; }
+
+/* photo upload */
+.photo-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 10px; padding: 32px;
+  text-align: center; cursor: pointer;
+  transition: all 0.2s;
+  background: var(--sand);
+}
+.photo-upload-area:hover {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+}
+.photo-upload-area .upload-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.photo-upload-area p { font-size: 0.85rem; color: var(--warm-gray); }
+.photo-upload-area span { font-size: 0.75rem; color: var(--warm-gray-light); }
+.photo-previews {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;
+}
+.photo-preview {
+  aspect-ratio: 4/3; background: var(--border);
+  border-radius: 6px; overflow: hidden; position: relative;
+}
+.photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* plan summary sidebar */
+.plan-summary {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+}
+.plan-summary-header {
+  background: var(--charcoal);
+  padding: 20px 22px;
+}
+.plan-summary-header .eyebrow { color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+.plan-summary-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; color: var(--white); font-weight: 600;
+}
+.plan-summary-header .summary-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; color: var(--gold); font-weight: 700;
+  margin-top: 8px;
+}
+.plan-summary-header .summary-period { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
+.plan-summary-body { padding: 20px 22px; }
+.summary-feature {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.82rem; color: var(--warm-gray);
+  margin-bottom: 10px;
+}
+.summary-feature:last-child { margin-bottom: 0; }
+.summary-feature::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+.plan-summary-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--sand);
+}
+.plan-summary-footer p { font-size: 0.75rem; color: var(--warm-gray); line-height: 1.5; }
+.change-plan-link {
+  color: var(--gold); text-decoration: none; font-weight: 600;
+  font-size: 0.75rem; margin-top: 6px; display: inline-block;
+}
+.change-plan-link:hover { text-decoration: underline; }
+
+/* section card */
+.form-section {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 24px;
+  margin-bottom: 20px;
+}
+.form-section-title {
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--warm-gray); margin-bottom: 18px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+
+/* ─── STEP 4: PAYMENT ─── */
+.payment-layout {
+  max-width: 860px; margin: 0 auto;
+  padding: 48px 40px;
+  display: grid; grid-template-columns: 1.3fr 1fr;
+  gap: 40px; align-items: start;
+}
+
+.payment-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 600;
+  margin-bottom: 24px;
+}
+
+/* card number input style */
+.card-field {
+  position: relative;
+}
+.card-field .card-icons {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  display: flex; gap: 4px;
+}
+.card-icon {
+  width: 32px; height: 20px;
+  background: var(--sand); border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem; font-weight: 700; color: var(--warm-gray);
+  border: 1px solid var(--border);
+}
+
+/* order summary */
+.order-summary {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  position: sticky; top: 160px;
+}
+.order-summary-header {
+  background: var(--charcoal);
+  padding: 22px 24px;
+}
+.order-summary-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; color: var(--white); font-weight: 600;
+}
+.order-summary-body { padding: 22px 24px; }
+.order-line {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.875rem; margin-bottom: 12px;
+}
+.order-line .label { color: var(--warm-gray); }
+.order-line .val { font-weight: 600; }
+.order-line.highlighted { color: var(--charcoal); font-weight: 700; }
+.order-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.order-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 4px;
+}
+.order-total .label { font-weight: 700; font-size: 0.9rem; }
+.order-total .val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 700; color: var(--gold);
+}
+.order-note {
+  font-size: 0.73rem; color: var(--warm-gray);
+  line-height: 1.55; margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.secure-badge {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; font-weight: 600; color: var(--green);
+  margin-top: 14px;
+}
+
+/* promo code */
+.promo-row {
+  display: flex; gap: 10px; margin-bottom: 20px;
+}
+.promo-row input {
+  flex: 1;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  padding: 11px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+  color: var(--charcoal); outline: none;
+  transition: border-color 0.2s;
+  background: var(--white);
+}
+.promo-row input:focus { border-color: var(--gold); }
+.promo-btn {
+  background: var(--sand); color: var(--charcoal);
+  border: 1.5px solid var(--border); border-radius: 9px;
+  padding: 11px 20px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.promo-btn:hover { background: var(--charcoal); color: var(--white); border-color: var(--charcoal); }
+
+/* ─── STEP 5: CONFIRMATION ─── */
+.confirmation-wrap {
+  max-width: 640px; margin: 0 auto;
+  padding: 60px 40px;
+  text-align: center;
+}
+.confetti-ring {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, var(--gold-pale), var(--gold-light));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.8rem; margin: 0 auto 32px;
+  box-shadow: 0 0 0 8px rgba(201,168,76,0.1), 0 0 0 16px rgba(201,168,76,0.05);
+  animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.confirmation-wrap h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem; font-weight: 700;
+  letter-spacing: -0.3px; margin-bottom: 12px;
+}
+.confirmation-wrap > p {
+  color: var(--warm-gray); font-size: 0.95rem;
+  max-width: 440px; margin: 0 auto 40px; line-height: 1.7;
+}
+.confirmation-details {
+  background: var(--white);
+  border: 1.5px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 32px; text-align: left;
+}
+.conf-detail-header {
+  background: var(--charcoal); padding: 18px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.conf-detail-header h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; color: var(--white); font-weight: 600;
+}
+.conf-detail-header span { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
+.conf-detail-body { padding: 22px 24px; }
+.conf-row {
+  display: flex; justify-content: space-between;
+  font-size: 0.875rem; margin-bottom: 12px; align-items: center;
+}
+.conf-row .label { color: var(--warm-gray); }
+.conf-row .val { font-weight: 600; }
+.conf-row .val.gold { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1rem; }
+.status-pill {
+  background: var(--green-light); color: var(--green);
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 10px; border-radius: 20px;
+}
+.next-steps {
+  background: var(--sand);
+  border-radius: 12px; padding: 24px; text-align: left;
+  margin-bottom: 32px;
+}
+.next-steps h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 600; margin-bottom: 16px;
+}
+.next-step-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  margin-bottom: 14px;
+}
+.next-step-item:last-child { margin-bottom: 0; }
+.step-num {
+  width: 26px; height: 26px; flex-shrink: 0;
+  background: var(--gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: var(--charcoal);
+}
+.next-step-item div p { font-size: 0.84rem; color: var(--warm-gray); }
+.next-step-item div strong { font-size: 0.875rem; display: block; margin-bottom: 2px; }
+.conf-btns { display: flex; flex-direction: column; gap: 12px; }
+.btn-dashboard {
+  background: var(--charcoal); color: var(--white);
+  border: none; border-radius: 9px; padding: 16px 32px;
+  font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-dashboard:hover { background: var(--gold); color: var(--charcoal); }
+.btn-listing-link {
+  background: transparent; color: var(--warm-gray);
+  border: 2px solid var(--border); border-radius: 9px; padding: 14px 32px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-listing-link:hover { border-color: var(--charcoal); color: var(--charcoal); }
+
+/* ─── MISC ─── */
+.input-addon-wrap { position: relative; }
+.input-addon-wrap .addon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--warm-gray); font-weight: 600; font-size: 0.9rem;
+}
+.input-addon-wrap input { padding-left: 28px; }
+
+@media (max-width: 820px) {
+  .plans-grid { grid-template-columns: 1fr; }
+  .details-layout, .payment-layout { grid-template-columns: 1fr; }
+  .details-sidebar, .order-summary { position: relative; top: auto; }
+  .form-row { grid-template-columns: 1fr; }
+  nav { padding: 0 20px; }
+  .progress-wrap { padding: 0 12px; }
+  .prog-label { display: none; }
+  .plans-grid, .compare-wrap, .step-nav { padding-left: 20px; padding-right: 20px; }
+  .plan-hero { padding: 32px 20px 0; }
+  .form-container, .details-layout, .payment-layout, .confirmation-wrap { padding-left: 20px; padding-right: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="apartment-directory.html" class="nav-logo">Apt<span>Find</span></a>
+  <a href="apartment-directory.html" class="nav-back">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Directory
+  </a>
+</nav>
+
+<!-- PROGRESS BAR -->
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="prog-step active" id="prog-1" onclick="goToStep(1)">
+      <div class="prog-dot">1</div>
+      <div class="prog-label">Choose Plan</div>
+    </div>
+    <div class="prog-step" id="prog-2" onclick="goToStep(2)">
+      <div class="prog-dot">2</div>
+      <div class="prog-label">Your Account</div>
+    </div>
+    <div class="prog-step" id="prog-3" onclick="goToStep(3)">
+      <div class="prog-dot">3</div>
+      <div class="prog-label">Community Details</div>
+    </div>
+    <div class="prog-step" id="prog-4" onclick="goToStep(4)">
+      <div class="prog-dot">4</div>
+      <div class="prog-label">Payment</div>
+    </div>
+    <div class="prog-step" id="prog-5">
+      <div class="prog-dot">✓</div>
+      <div class="prog-label">Confirmation</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ═══════════════════════════ STEP 1: PLAN ═══════════════════════════ -->
+  <div class="step active" id="step-1">
+    <div class="plan-hero">
+      <div class="eyebrow">For Property Managers</div>
+      <h1>List Your Community on <em>AptFind</em></h1>
+      <p>Reach thousands of active renters searching in your market. Choose the plan that fits your goals.</p>
+      <div class="billing-toggle">
+        <span>Monthly</span>
+        <button class="toggle-btn" id="billingToggle" onclick="toggleBilling()"></button>
+        <span>Annual</span>
+        <span class="save-badge">SAVE 20%</span>
+      </div>
+    </div>
+
+    <div class="plans-grid">
+      <!-- BASIC -->
+      <div class="plan-card" id="plan-basic" onclick="selectPlan('basic')">
+        <div class="plan-tier">Basic</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price"><sup>$</sup><span class="price-num" data-monthly="49" data-annual="39">49</span></div>
+        </div>
+        <div class="plan-period">per month, per community</div>
+        <div class="plan-annual-note" id="note-basic"></div>
+        <div class="plan-desc">Great for smaller communities or those just getting started with online visibility.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>Standard directory listing</li>
+          <li><span class="check">✓</span>Up to 6 photos</li>
+          <li><span class="check">✓</span>Contact form & lead capture</li>
+          <li><span class="check">✓</span>Basic amenity tags</li>
+          <li><span class="check">✓</span>City search visibility</li>
+          <li><span class="check">✓</span>Monthly lead summary email</li>
+        </ul>
+        <button class="plan-select-btn">Select Basic</button>
+      </div>
+
+      <!-- PRO (highlighted) -->
+      <div class="plan-card highlighted" id="plan-pro" onclick="selectPlan('pro')">
+        <div class="plan-popular">Most Popular</div>
+        <div class="plan-tier">Professional</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price"><sup>$</sup><span class="price-num" data-monthly="149" data-annual="119">149</span></div>
+        </div>
+        <div class="plan-period">per month, per community</div>
+        <div class="plan-annual-note" id="note-pro"></div>
+        <div class="plan-desc">The most popular choice — full visibility with analytics and featured placement.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>Everything in Basic</li>
+          <li><span class="check">✓</span>Priority search placement</li>
+          <li><span class="check">✓</span>Up to 30 photos + virtual tour</li>
+          <li><span class="check">✓</span>Real-time lead notifications</li>
+          <li><span class="check">✓</span>Analytics dashboard</li>
+          <li><span class="check">✓</span>Featured badge on listing</li>
+          <li><span class="check">✓</span>Social sharing tools</li>
+        </ul>
+        <button class="plan-select-btn">Select Professional</button>
+      </div>
+
+      <!-- PREMIUM -->
+      <div class="plan-card" id="plan-premium" onclick="selectPlan('premium')">
+        <div class="plan-tier">Premium</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price"><sup>$</sup><span class="price-num" data-monthly="349" data-annual="279">349</span></div>
+        </div>
+        <div class="plan-period">per month, per community</div>
+        <div class="plan-annual-note" id="note-premium"></div>
+        <div class="plan-desc">Maximum visibility for high-volume communities and management companies.</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>Everything in Professional</li>
+          <li><span class="check">✓</span>Homepage featured placement</li>
+          <li><span class="check">✓</span>Top of city search results</li>
+          <li><span class="check">✓</span>Unlimited photos & floor plans</li>
+          <li><span class="check">✓</span>Branded community landing page</li>
+          <li><span class="check">✓</span>CRM lead integration</li>
+          <li><span class="check">✓</span>Dedicated account manager</li>
+          <li><span class="check">✓</span>Monthly performance report</li>
+        </ul>
+        <button class="plan-select-btn">Select Premium</button>
+      </div>
+    </div>
+
+    <!-- Feature Comparison -->
+    <div class="compare-wrap">
+      <button class="compare-toggle" id="compareToggle" onclick="toggleCompare()">
+        <span>Compare all features</span>
+        <svg class="arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <table class="compare-table" id="compareTable">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="plan-col">Basic</th>
+            <th class="plan-col" style="color:var(--gold)">Pro</th>
+            <th class="plan-col">Premium</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Directory listing</td><td class="check-y">✓</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Photos</td><td>Up to 6</td><td>Up to 30</td><td>Unlimited</td></tr>
+          <tr><td>Virtual tour</td><td class="check-n">—</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Lead capture form</td><td class="check-y">✓</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Real-time lead alerts</td><td class="check-n">—</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Analytics dashboard</td><td class="check-n">—</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Featured badge</td><td class="check-n">—</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Priority search placement</td><td class="check-n">—</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+          <tr><td>Homepage placement</td><td class="check-n">—</td><td class="check-n">—</td><td class="check-y">✓</td></tr>
+          <tr><td>Branded landing page</td><td class="check-n">—</td><td class="check-n">—</td><td class="check-y">✓</td></tr>
+          <tr><td>CRM integration</td><td class="check-n">—</td><td class="check-n">—</td><td class="check-y">✓</td></tr>
+          <tr><td>Dedicated account manager</td><td class="check-n">—</td><td class="check-n">—</td><td class="check-y">✓</td></tr>
+          <tr><td>Cancel anytime</td><td class="check-y">✓</td><td class="check-y">✓</td><td class="check-y">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-next" id="planNextBtn" onclick="nextStep()" disabled>
+        Continue with Plan <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 2: ACCOUNT ═══════════════════════════ -->
+  <div class="step" id="step-2">
+    <div class="form-container">
+      <div class="step-heading">
+        <div class="eyebrow">Step 2 of 4</div>
+        <h2>Create Your Account</h2>
+        <p>Your account lets you manage listings, view leads, and track analytics.</p>
+      </div>
+
+      <div class="social-signin">
+        <button class="social-btn">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+        <button class="social-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.04.033.05a19.8 19.8 0 0 0 5.993 3.03.079.079 0 0 0 .085-.026c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          Continue with Microsoft
+        </button>
+      </div>
+
+      <div class="form-divider">or sign up with email</div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>First Name <span class="req">*</span></label>
+          <input type="text" placeholder="Jane">
+        </div>
+        <div class="field">
+          <label>Last Name <span class="req">*</span></label>
+          <input type="text" placeholder="Smith">
+        </div>
+      </div>
+      <div class="field">
+        <label>Work Email <span class="req">*</span></label>
+        <input type="email" placeholder="jane@yourcompany.com">
+      </div>
+      <div class="field">
+        <label>Company / Management Company</label>
+        <input type="text" placeholder="Smith Property Group">
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="tel" placeholder="(555) 000-0000">
+      </div>
+      <div class="field">
+        <label>Password <span class="req">*</span></label>
+        <div class="password-wrap">
+          <input type="password" id="passwordInput" placeholder="Min. 8 characters">
+          <button class="password-toggle" onclick="togglePassword()">Show</button>
+        </div>
+        <div class="hint">At least 8 characters with one number or symbol.</div>
+      </div>
+
+      <div class="step-nav" style="padding:0;margin-top:28px;">
+        <button class="btn-back-step" onclick="prevStep()">← Back</button>
+        <button class="btn-next" onclick="nextStep()">
+          Continue <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <p class="terms-note">By continuing you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. We'll never share your info.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 3: DETAILS ═══════════════════════════ -->
+  <div class="step" id="step-3">
+    <div class="details-layout">
+      <div class="details-form">
+        <div class="step-heading">
+          <div class="eyebrow">Step 3 of 4</div>
+          <h2>Community Details</h2>
+          <p>Tell renters what makes your community great. Better listings get more leads.</p>
+        </div>
+
+        <!-- Basic Info -->
+        <div class="form-section">
+          <div class="form-section-title">📍 Basic Information</div>
+          <div class="field">
+            <label>Community Name <span class="req">*</span></label>
+            <input type="text" placeholder="e.g. The Monarch Residences">
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>City <span class="req">*</span></label>
+              <input type="text" placeholder="Austin">
+            </div>
+            <div class="field">
+              <label>State <span class="req">*</span></label>
+              <select>
+                <option value="">Select state...</option>
+                <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
+                <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+                <option>FL</option><option>GA</option><option>HI</option><option>ID</option>
+                <option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+                <option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+                <option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+                <option>MO</option><option>MT</option><option>NE</option><option>NV</option>
+                <option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+                <option>NC</option><option>ND</option><option>OH</option><option>OK</option>
+                <option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+                <option>SD</option><option>TN</option><option selected>TX</option><option>UT</option>
+                <option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+                <option>WI</option><option>WY</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Street Address</label>
+            <input type="text" placeholder="1234 South Congress Ave">
+          </div>
+          <div class="field">
+            <label>Neighborhood / Submarket</label>
+            <input type="text" placeholder="e.g. South Congress, Zilker, Downtown">
+          </div>
+          <div class="field">
+            <label>Community Website</label>
+            <input type="url" placeholder="https://themonarchresidences.com">
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="form-section">
+          <div class="form-section-title">💰 Pricing & Availability</div>
+          <div class="form-row">
+            <div class="field">
+              <label>Starting Rent <span class="req">*</span></label>
+              <div class="input-addon-wrap">
+                <span class="addon">$</span>
+                <input type="number" placeholder="1,200">
+              </div>
+            </div>
+            <div class="field">
+              <label>Max Rent</label>
+              <div class="input-addon-wrap">
+                <span class="addon">$</span>
+                <input type="number" placeholder="3,500">
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Unit Types Available <span class="req">*</span></label>
+            <div class="amenity-grid">
+              <label class="amenity-check" onclick="toggleAmenity(this)">
+                <input type="checkbox"><span class="amenity-icon">🛏️</span> Studio
+              </label>
+              <label class="amenity-check" onclick="toggleAmenity(this)">
+                <input type="checkbox"><span class="amenity-icon">🛏️</span> 1 Bedroom
+              </label>
+              <label class="amenity-check checked" onclick="toggleAmenity(this)">
+                <input type="checkbox" checked><span class="amenity-icon">🛏️</span> 2 Bedroom
+              </label>
+              <label class="amenity-check" onclick="toggleAmenity(this)">
+                <input type="checkbox"><span class="amenity-icon">🛏️</span> 3+ Bedroom
+              </label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Total Units</label>
+              <input type="number" placeholder="248">
+            </div>
+            <div class="field">
+              <label>Year Built</label>
+              <input type="number" placeholder="2021">
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-section">
+          <div class="form-section-title">📝 Description</div>
+          <div class="field">
+            <label>Community Description <span class="req">*</span></label>
+            <textarea rows="5" placeholder="Describe what makes your community unique — amenities, lifestyle, location perks, nearby attractions..."></textarea>
+            <div class="hint">Listings with 150+ word descriptions get 40% more leads on average.</div>
+          </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="form-section">
+          <div class="form-section-title">✨ Amenities</div>
+          <div class="amenity-grid">
+            <label class="amenity-check checked" onclick="toggleAmenity(this)"><input type="checkbox" checked><span class="amenity-icon">🏊</span> Pool</label>
+            <label class="amenity-check checked" onclick="toggleAmenity(this)"><input type="checkbox" checked><span class="amenity-icon">🐾</span> Pet Friendly</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">🏋️</span> Fitness Center</label>
+            <label class="amenity-check checked" onclick="toggleAmenity(this)"><input type="checkbox" checked><span class="amenity-icon">🌇</span> Rooftop Deck</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">🚗</span> Parking / Garage</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">⚡</span> EV Charging</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">💼</span> Co-working Space</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">🧺</span> In-Unit Laundry</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">🛎️</span> Concierge</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">🔒</span> Gated Community</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">📦</span> Package Lockers</label>
+            <label class="amenity-check" onclick="toggleAmenity(this)"><input type="checkbox"><span class="amenity-icon">🌳</span> Outdoor Space</label>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="form-section">
+          <div class="form-section-title">📸 Photos</div>
+          <div class="photo-upload-area" onclick="simulateUpload()">
+            <div class="upload-icon">📁</div>
+            <p><strong>Drag & drop photos here</strong> or click to browse</p>
+            <span>JPG, PNG up to 10MB each · First photo becomes your cover</span>
+          </div>
+          <div class="photo-previews" id="photoPreviews">
+            <div class="photo-preview"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200&q=70" alt=""></div>
+            <div class="photo-preview"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200&q=70" alt=""></div>
+          </div>
+        </div>
+
+        <div class="step-nav" style="padding:0;">
+          <button class="btn-back-step" onclick="prevStep()">← Back</button>
+          <button class="btn-next" onclick="nextStep()">
+            Continue to Payment <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sidebar: Plan Summary -->
+      <div class="details-sidebar">
+        <div class="plan-summary">
+          <div class="plan-summary-header">
+            <div class="eyebrow">Selected Plan</div>
+            <h3 id="summaryPlanName">Professional</h3>
+            <div class="summary-price" id="summaryPrice">$149<span style="font-size:1rem;font-weight:400">/mo</span></div>
+            <div class="summary-period" id="summaryBilling">Billed monthly · Cancel anytime</div>
+          </div>
+          <div class="plan-summary-body" id="summaryFeatures">
+            <div class="summary-feature">Priority search placement</div>
+            <div class="summary-feature">Up to 30 photos + virtual tour</div>
+            <div class="summary-feature">Real-time lead notifications</div>
+            <div class="summary-feature">Analytics dashboard</div>
+            <div class="summary-feature">Featured badge on listing</div>
+          </div>
+          <div class="plan-summary-footer">
+            <p>You can upgrade, downgrade, or cancel anytime from your dashboard.</p>
+            <a href="#" class="change-plan-link" onclick="goToStep(1); return false;">← Change plan</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 4: PAYMENT ═══════════════════════════ -->
+  <div class="step" id="step-4">
+    <div class="payment-layout">
+      <div>
+        <div class="step-heading">
+          <div class="eyebrow">Step 4 of 4</div>
+          <h2>Payment Details</h2>
+          <p>Your subscription starts immediately after payment. Cancel anytime.</p>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">💳 Card Information</div>
+          <div class="field card-field">
+            <label>Card Number <span class="req">*</span></label>
+            <input type="text" placeholder="1234  5678  9012  3456" id="cardNum" oninput="formatCard(this)" maxlength="19">
+            <div class="card-icons">
+              <div class="card-icon">VISA</div>
+              <div class="card-icon">MC</div>
+              <div class="card-icon">AMEX</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Expiry Date <span class="req">*</span></label>
+              <input type="text" placeholder="MM / YY" oninput="formatExpiry(this)" maxlength="7">
+            </div>
+            <div class="field">
+              <label>Security Code <span class="req">*</span></label>
+              <input type="text" placeholder="CVV" maxlength="4">
+            </div>
+          </div>
+          <div class="field">
+            <label>Name on Card <span class="req">*</span></label>
+            <input type="text" placeholder="Jane Smith">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🏢 Billing Address</div>
+          <div class="field">
+            <label>Address <span class="req">*</span></label>
+            <input type="text" placeholder="123 Main Street">
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>City <span class="req">*</span></label>
+              <input type="text" placeholder="Austin">
+            </div>
+            <div class="field">
+              <label>ZIP Code <span class="req">*</span></label>
+              <input type="text" placeholder="78704" maxlength="5">
+            </div>
+          </div>
+        </div>
+
+        <!-- Promo code -->
+        <div class="form-section">
+          <div class="form-section-title">🎟️ Promo Code</div>
+          <div class="promo-row">
+            <input type="text" id="promoInput" placeholder="Enter promo code">
+            <button class="promo-btn" onclick="applyPromo()">Apply</button>
+          </div>
+          <div id="promoMsg" style="font-size:0.8rem;display:none;"></div>
+        </div>
+
+        <div class="step-nav" style="padding:0;">
+          <button class="btn-back-step" onclick="prevStep()">← Back</button>
+          <button class="btn-next" onclick="processPayment()">
+            <span id="payBtnText">Pay & Activate Listing</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="secure-badge" style="justify-content:center;margin-top:16px;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          256-bit SSL encryption · Powered by Stripe
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div>
+        <div class="order-summary">
+          <div class="order-summary-header">
+            <h3>Order Summary</h3>
+          </div>
+          <div class="order-summary-body">
+            <div class="order-line">
+              <span class="label" id="orderPlanLabel">Professional Plan</span>
+              <span class="val" id="orderBasePrice">$149.00</span>
+            </div>
+            <div class="order-line" id="annualSavingsLine" style="display:none;">
+              <span class="label" style="color:var(--green)">Annual discount (20%)</span>
+              <span class="val" style="color:var(--green)" id="annualSavingsAmt">−$360.00</span>
+            </div>
+            <div class="order-line" id="promoLine" style="display:none;">
+              <span class="label" style="color:var(--green)">Promo: <span id="promoCode"></span></span>
+              <span class="val" style="color:var(--green)" id="promoAmt"></span>
+            </div>
+            <div class="order-divider"></div>
+            <div class="order-total">
+              <span class="label" id="totalLabel">Total due today</span>
+              <span class="val" id="orderTotal">$149</span>
+            </div>
+            <div class="order-note" id="orderNote">
+              You'll be billed $149/month. Cancel anytime from your dashboard — no cancellation fees.
+            </div>
+            <div class="secure-badge">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Secure payment
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 5: CONFIRMATION ═══════════════════════════ -->
+  <div class="step" id="step-5">
+    <div class="confirmation-wrap">
+      <div class="confetti-ring">🎉</div>
+      <h2>You're Live on AptFind!</h2>
+      <p>Your listing is now active and visible to renters searching your market. Here's everything you need to know to get started.</p>
+
+      <div class="confirmation-details">
+        <div class="conf-detail-header">
+          <h4>Listing & Subscription Confirmed</h4>
+          <span>Order #APT-<span id="orderRef"></span></span>
+        </div>
+        <div class="conf-detail-body">
+          <div class="conf-row"><span class="label">Plan</span><span class="val" id="confPlan">Professional</span></div>
+          <div class="conf-row"><span class="label">Community</span><span class="val">Your Community</span></div>
+          <div class="conf-row"><span class="label">Billing</span><span class="val" id="confBilling">$149/month</span></div>
+          <div class="conf-row"><span class="label">Next billing date</span><span class="val" id="confNextBill"></span></div>
+          <div class="conf-row"><span class="label">Status</span><span class="val"><span class="status-pill">✓ Active</span></span></div>
+          <div class="conf-row"><span class="label">Confirmation email</span><span class="val">Sent to your inbox</span></div>
+        </div>
+      </div>
+
+      <div class="next-steps">
+        <h4>What Happens Next</h4>
+        <div class="next-step-item">
+          <div class="step-num">1</div>
+          <div>
+            <strong>Your listing is live</strong>
+            <p>Renters searching in your market can now find and contact your community.</p>
+          </div>
+        </div>
+        <div class="next-step-item">
+          <div class="step-num">2</div>
+          <div>
+            <strong>Complete your listing</strong>
+            <p>Add more photos, a virtual tour, and floor plans from your dashboard to maximize lead volume.</p>
+          </div>
+        </div>
+        <div class="next-step-item">
+          <div class="step-num">3</div>
+          <div>
+            <strong>Receive your first leads</strong>
+            <p>When renters request info, you'll be notified immediately. Respond fast — speed wins leases.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="conf-btns">
+        <button class="btn-dashboard" onclick="alert('Redirecting to dashboard...')">
+          Go to Your Dashboard
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="btn-listing-link" onclick="alert('Previewing your live listing...')">
+          Preview My Listing →
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+/* ── STATE ── */
+let currentStep = 1;
+let selectedPlan = null;
+let isAnnual = false;
+const promos = { 'APTFIND20': 20, 'WELCOME10': 10 };
+
+const planData = {
+  basic:   { name: 'Basic',        monthly: 49,  annual: 39,  features: ['Standard directory listing','Up to 6 photos','Lead capture form','Basic amenity tags','City search visibility'] },
+  pro:     { name: 'Professional', monthly: 149, annual: 119, features: ['Priority search placement','Up to 30 photos + virtual tour','Real-time lead notifications','Analytics dashboard','Featured badge'] },
+  premium: { name: 'Premium',      monthly: 349, annual: 279, features: ['Homepage featured placement','Top of city search results','Unlimited photos & floor plans','Branded landing page','CRM integration','Dedicated account manager'] }
+};
+
+/* ── PLAN SELECTION ── */
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('plan-' + plan).classList.add('selected');
+  document.getElementById('planNextBtn').disabled = false;
+  updateSidebar();
+  updateOrderSummary();
+}
+
+/* ── BILLING TOGGLE ── */
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  document.getElementById('billingToggle').classList.toggle('on', isAnnual);
+  document.querySelectorAll('.price-num').forEach(el => {
+    el.textContent = isAnnual ? el.dataset.annual : el.dataset.monthly;
+  });
+  ['basic','pro','premium'].forEach(p => {
+    const el = document.getElementById('note-' + p);
+    el.textContent = isAnnual ? `Save $${(planData[p].monthly - planData[p].annual) * 12}/year` : '';
+  });
+  updateSidebar();
+  updateOrderSummary();
+}
+
+/* ── SIDEBAR SUMMARY ── */
+function updateSidebar() {
+  if (!selectedPlan) return;
+  const p = planData[selectedPlan];
+  const price = isAnnual ? p.annual : p.monthly;
+  document.getElementById('summaryPlanName').textContent = p.name;
+  document.getElementById('summaryPrice').innerHTML = `$${price}<span style="font-size:1rem;font-weight:400">/mo</span>`;
+  document.getElementById('summaryBilling').textContent = isAnnual ? 'Billed annually · Cancel anytime' : 'Billed monthly · Cancel anytime';
+  const featHtml = p.features.map(f => `<div class="summary-feature">${f}</div>`).join('');
+  document.getElementById('summaryFeatures').innerHTML = featHtml;
+}
+
+/* ── ORDER SUMMARY ── */
+let promoDiscount = 0;
+function updateOrderSummary() {
+  if (!selectedPlan) return;
+  const p = planData[selectedPlan];
+  const base = isAnnual ? p.annual * 12 : p.monthly;
+  const annualSaving = isAnnual ? (p.monthly - p.annual) * 12 : 0;
+  const promoAmt = Math.round(base * promoDiscount / 100);
+  const total = base - promoAmt;
+
+  document.getElementById('orderPlanLabel').textContent = `${p.name} Plan`;
+  document.getElementById('orderBasePrice').textContent = `$${base.toLocaleString()}${isAnnual ? '/yr' : '/mo'}`;
+  document.getElementById('annualSavingsLine').style.display = isAnnual ? 'flex' : 'none';
+  document.getElementById('annualSavingsAmt').textContent = `−$${annualSaving}`;
+  document.getElementById('orderTotal').textContent = `$${total.toLocaleString()}`;
+  document.getElementById('totalLabel').textContent = isAnnual ? 'Total due today (annual)' : 'Total due today';
+  document.getElementById('orderNote').textContent = isAnnual
+    ? `You'll be billed $${(p.annual * 12).toLocaleString()} today. Renews annually. Cancel anytime.`
+    : `You'll be billed $${p.monthly}/month. Cancel anytime — no fees.`;
+}
+
+/* ── PROMO CODE ── */
+function applyPromo() {
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  const msg = document.getElementById('promoMsg');
+  if (promos[code]) {
+    promoDiscount = promos[code];
+    msg.style.display = 'block';
+    msg.style.color = 'var(--green)';
+    msg.textContent = `✓ Promo applied — ${promoDiscount}% off!`;
+    document.getElementById('promoLine').style.display = 'flex';
+    document.getElementById('promoCode').textContent = code;
+    const p = planData[selectedPlan];
+    const base = isAnnual ? p.annual * 12 : p.monthly;
+    const amt = Math.round(base * promoDiscount / 100);
+    document.getElementById('promoAmt').textContent = `−$${amt}`;
+    updateOrderSummary();
+  } else {
+    msg.style.display = 'block';
+    msg.style.color = 'var(--rust)';
+    msg.textContent = 'Invalid promo code. Try APTFIND20 or WELCOME10.';
+  }
+}
+
+/* ── COMPARE TABLE ── */
+function toggleCompare() {
+  const t = document.getElementById('compareTable');
+  const btn = document.getElementById('compareToggle');
+  t.classList.toggle('visible');
+  btn.classList.toggle('open');
+}
+
+/* ── STEP NAVIGATION ── */
+function nextStep() {
+  if (currentStep < 5) goToStep(currentStep + 1);
+}
+function prevStep() {
+  if (currentStep > 1) goToStep(currentStep - 1);
+}
+function goToStep(n) {
+  if (n > currentStep && n > 1 && !selectedPlan) return;
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('prog-' + currentStep).classList.remove('active');
+  for (let i = 1; i < n; i++) {
+    document.getElementById('prog-' + i).classList.add('completed');
+    document.getElementById('prog-' + i).querySelector('.prog-dot').textContent = '✓';
+  }
+  currentStep = n;
+  document.getElementById('step-' + n).classList.add('active');
+  document.getElementById('prog-' + n).classList.add('active');
+  if (n <= 4) {
+    document.getElementById('prog-' + n).querySelector('.prog-dot').textContent = n;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── PAYMENT PROCESSING ── */
+function processPayment() {
+  const btn = document.getElementById('payBtnText');
+  btn.textContent = 'Processing...';
+  setTimeout(() => {
+    // Set confirmation data
+    const p = planData[selectedPlan || 'pro'];
+    const price = isAnnual ? p.annual : p.monthly;
+    document.getElementById('confPlan').textContent = p.name;
+    document.getElementById('confBilling').textContent = `$${price}/${isAnnual ? 'yr' : 'mo'}`;
+    document.getElementById('orderRef').textContent = Math.floor(100000 + Math.random() * 900000);
+    const nextBill = new Date();
+    nextBill.setMonth(nextBill.getMonth() + (isAnnual ? 12 : 1));
+    document.getElementById('confNextBill').textContent = nextBill.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    btn.textContent = 'Pay & Activate Listing';
+    goToStep(5);
+    // Sparkle the progress
+    document.getElementById('prog-5').classList.add('active', 'completed');
+  }, 1800);
+}
+
+/* ── MISC ── */
+function toggleAmenity(el) {
+  el.classList.toggle('checked');
+}
+function togglePassword() {
+  const inp = document.getElementById('passwordInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1  ').trim();
+}
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,4);
+  if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
+  el.value = v;
+}
+function simulateUpload() {
+  const p = document.getElementById('photoPreviews');
+  const imgs = ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=200&q=70','https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=200&q=70'];
+  imgs.forEach(src => {
+    if (p.children.length < 6) {
+      const d = document.createElement('div');
+      d.className = 'photo-preview';
+      d.innerHTML = `<img src="${src}" alt="">`;
+      p.appendChild(d);
+    }
+  });
+}
+
+// Auto-select Pro on load
+selectPlan('pro');
+</script>
+</body>
+</html>

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Apartments — AptFind</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sand: #f5f0e8;
+  --cream: #faf8f4;
+  --charcoal: #1c1c1e;
+  --warm-gray: #6b6460;
+  --warm-gray-light: #9b9490;
+  --gold: #c9a84c;
+  --gold-light: #e8d5a3;
+  --gold-pale: #f7f0de;
+  --rust: #b85c38;
+  --white: #fff;
+  --border: #e2ddd6;
+  --green: #2d7a5f;
+  --green-light: #e8f5f0;
+  --shadow-sm: 0 1px 6px rgba(28,28,30,.07);
+  --shadow-md: 0 4px 20px rgba(28,28,30,.10);
+  --shadow-lg: 0 12px 48px rgba(28,28,30,.14);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); line-height: 1.6; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(250,248,244,.97); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 64px; padding: 0 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--charcoal); text-decoration: none; white-space: nowrap; }
+.nav-logo span { color: var(--gold); }
+.nav-search {
+  flex: 1; max-width: 500px;
+  display: flex; align-items: center;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 0 12px; height: 40px; gap: 8px;
+  transition: border-color .2s;
+}
+.nav-search:focus-within { border-color: var(--gold); }
+.nav-search input { flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: .875rem; background: transparent; color: var(--charcoal); }
+.nav-search input::placeholder { color: #bbb; }
+.nav-search-btn { background: var(--gold); border: none; border-radius: 5px; padding: 5px 14px; font-family: 'DM Sans', sans-serif; font-size: .8rem; font-weight: 600; color: var(--charcoal); cursor: pointer; white-space: nowrap; transition: background .2s; }
+.nav-search-btn:hover { background: #b8943a; }
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-saved { display: flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 500; color: var(--warm-gray); cursor: pointer; padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); transition: all .2s; white-space: nowrap; }
+.nav-saved:hover { border-color: var(--gold); color: var(--charcoal); }
+.saved-count { background: var(--gold); color: var(--charcoal); font-size: .65rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.nav-login { background: var(--charcoal); color: var(--white); border: none; border-radius: 6px; padding: 8px 18px; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600; cursor: pointer; transition: background .2s; white-space: nowrap; }
+.nav-login:hover { background: var(--gold); color: var(--charcoal); }
+
+/* ── SEARCH HEADER BAR ── */
+.search-header {
+  position: fixed; top: 64px; left: 0; right: 0; z-index: 190;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 10px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.active-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+.filter-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--charcoal); color: var(--white);
+  font-size: .72rem; font-weight: 600;
+  padding: 5px 10px; border-radius: 20px;
+  cursor: pointer; transition: background .2s;
+}
+.filter-chip:hover { background: var(--rust); }
+.filter-chip .chip-x { font-size: .8rem; opacity: .7; }
+.chip-add { background: var(--sand); color: var(--warm-gray); border: 1.5px dashed var(--border-dark,#ccc); }
+.chip-add:hover { background: var(--gold-pale); border-color: var(--gold); color: var(--charcoal); }
+.results-meta { font-size: .82rem; color: var(--warm-gray); white-space: nowrap; }
+.results-meta strong { color: var(--charcoal); }
+.view-controls { display: flex; gap: 6px; }
+.view-btn { width: 34px; height: 34px; border: 1.5px solid var(--border); border-radius: 7px; background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.view-btn.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--white); }
+.view-btn:hover:not(.active) { border-color: var(--gold); }
+.sort-select { border: 1.5px solid var(--border); border-radius: 7px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: .8rem; color: var(--charcoal); background: var(--white); outline: none; cursor: pointer; }
+.sort-select:focus { border-color: var(--gold); }
+
+/* ── LAYOUT ── */
+.page-body { display: flex; padding-top: 120px; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 288px; flex-shrink: 0;
+  position: fixed; top: 120px; left: 0; bottom: 0;
+  overflow-y: auto; overflow-x: hidden;
+  background: var(--white); border-right: 1px solid var(--border);
+  padding: 20px 0 40px;
+  scrollbar-width: thin;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.filter-section { padding: 0 20px; margin-bottom: 4px; }
+.filter-section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0 10px;
+  border-top: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.filter-section-header:first-child { border-top: none; }
+.filter-section-title { font-size: .8rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--charcoal); }
+.filter-caret { font-size: .7rem; color: var(--warm-gray); transition: transform .25s; }
+.filter-section.collapsed .filter-caret { transform: rotate(-90deg); }
+.filter-body { padding-bottom: 16px; }
+.filter-section.collapsed .filter-body { display: none; }
+
+/* price range */
+.price-range-labels { display: flex; justify-content: space-between; font-size: .8rem; color: var(--warm-gray); margin-bottom: 10px; }
+.price-range-labels strong { color: var(--charcoal); font-weight: 600; }
+.range-track { position: relative; height: 4px; background: var(--border); border-radius: 2px; margin: 8px 0 16px; }
+.range-fill { position: absolute; height: 100%; background: var(--gold); border-radius: 2px; left: 0; right: 25%; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: transparent; position: absolute; top: 0; left: 0; margin: 0; pointer-events: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--white); border: 2.5px solid var(--gold); cursor: pointer; pointer-events: all; box-shadow: var(--shadow-sm); }
+
+/* bedroom btns */
+.bed-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.bed-btn { padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 7px; background: var(--white); font-family: 'DM Sans', sans-serif; font-size: .8rem; font-weight: 500; color: var(--warm-gray); cursor: pointer; transition: all .2s; }
+.bed-btn:hover { border-color: var(--gold-light); color: var(--charcoal); }
+.bed-btn.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--white); font-weight: 600; }
+
+/* amenity checkboxes */
+.amenity-list { display: flex; flex-direction: column; gap: 4px; }
+.amenity-row { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 7px; cursor: pointer; transition: background .15s; user-select: none; font-size: .84rem; color: var(--warm-gray); }
+.amenity-row:hover { background: var(--sand); color: var(--charcoal); }
+.amenity-row.checked { color: var(--charcoal); }
+.custom-cb { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.amenity-row.checked .custom-cb { background: var(--gold); border-color: var(--gold); }
+.cb-check { color: var(--charcoal); font-size: .6rem; font-weight: 900; display: none; }
+.amenity-row.checked .cb-check { display: block; }
+
+/* rating stars */
+.rating-opts { display: flex; flex-direction: column; gap: 6px; }
+.rating-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 8px; border-radius: 7px; cursor: pointer; transition: background .15s; user-select: none; }
+.rating-row:hover { background: var(--sand); }
+.rating-row.active { background: var(--gold-pale); }
+.rating-stars { color: var(--gold); font-size: .85rem; }
+.rating-count { font-size: .75rem; color: var(--warm-gray-light); }
+
+/* clear all */
+.sidebar-footer { padding: 16px 20px 0; }
+.clear-all-btn { width: 100%; padding: 10px; background: none; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 500; color: var(--warm-gray); cursor: pointer; transition: all .2s; }
+.clear-all-btn:hover { border-color: var(--rust); color: var(--rust); }
+
+/* ── RESULTS AREA ── */
+.results-area { margin-left: 288px; flex: 1; padding: 24px 28px 60px; }
+
+/* grid view */
+.results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.results-grid.two-col { grid-template-columns: repeat(2, 1fr); }
+.results-grid.list-view { grid-template-columns: 1fr; }
+
+/* card */
+.listing-card {
+  background: var(--white); border-radius: 12px; overflow: hidden;
+  box-shadow: var(--shadow-sm); border: 1.5px solid var(--border);
+  transition: transform .25s, box-shadow .25s, border-color .25s;
+  cursor: pointer; text-decoration: none; color: inherit; display: block;
+  animation: cardIn .4s ease both;
+}
+.listing-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--gold-light); }
+.listing-card.saved { border-color: var(--gold); }
+
+@keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.card-img { position: relative; height: 190px; overflow: hidden; }
+.results-grid.list-view .card-img { height: 200px; width: 280px; flex-shrink: 0; }
+.results-grid.list-view .listing-card { display: flex; }
+.results-grid.list-view .card-content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+.listing-card:hover .card-img img { transform: scale(1.04); }
+
+.card-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
+.badge { font-size: .65rem; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; padding: 4px 9px; border-radius: 4px; }
+.badge-featured { background: var(--gold); color: var(--charcoal); }
+.badge-new { background: var(--green); color: var(--white); }
+.badge-ad { background: var(--rust); color: var(--white); }
+
+.save-btn {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,.92); border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem; cursor: pointer; transition: all .2s;
+  box-shadow: var(--shadow-sm);
+}
+.save-btn:hover { background: var(--white); transform: scale(1.1); }
+.save-btn.saved-active { background: var(--gold-pale); color: var(--gold); }
+
+.card-body { padding: 14px 16px 16px; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.card-location { font-size: .72rem; color: var(--warm-gray); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+.card-rating { font-size: .76rem; font-weight: 600; color: var(--charcoal); }
+.card-rating .star { color: var(--gold); }
+.card-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+.card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+.tag { background: var(--sand); color: var(--warm-gray); font-size: .68rem; font-weight: 500; padding: 3px 9px; border-radius: 20px; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+.card-price { font-size: .84rem; color: var(--warm-gray); }
+.card-price strong { font-size: 1rem; color: var(--charcoal); font-weight: 600; }
+.card-availability { font-size: .72rem; color: var(--green); font-weight: 600; background: var(--green-light); padding: 3px 9px; border-radius: 10px; }
+.card-availability.waitlist { color: var(--rust); background: #fdf0ec; }
+
+/* no results */
+.no-results { text-align: center; padding: 80px 20px; }
+.no-results .icon { font-size: 3rem; margin-bottom: 16px; }
+.no-results h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 8px; }
+.no-results p { color: var(--warm-gray); font-size: .9rem; margin-bottom: 24px; }
+
+/* pagination */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 40px; }
+.page-btn { width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; }
+.page-btn:hover { border-color: var(--gold); color: var(--charcoal); }
+.page-btn.active { background: var(--charcoal); border-color: var(--charcoal); color: var(--white); font-weight: 600; }
+.page-btn.disabled { opacity: .35; cursor: not-allowed; }
+
+/* ── MAP VIEW ── */
+.map-placeholder {
+  display: none;
+  background: linear-gradient(135deg, #e8e0d4 0%, #ddd5c8 100%);
+  border-radius: 12px;
+  height: calc(100vh - 160px);
+  position: sticky; top: 130px;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px;
+  text-align: center;
+  border: 1.5px dashed var(--border-dark, #ccc);
+}
+.map-placeholder.visible { display: flex; }
+.map-placeholder .map-icon { font-size: 3rem; }
+.map-placeholder h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+.map-placeholder p { font-size: .82rem; color: var(--warm-gray); max-width: 260px; }
+
+/* ── MAP+RESULTS SPLIT ── */
+.split-view { display: flex; gap: 20px; }
+.split-view .results-grid { grid-template-columns: 1fr; }
+.split-cards { flex: 1; min-width: 0; }
+.split-map { width: 380px; flex-shrink: 0; }
+
+/* ── SAVED DRAWER ── */
+.saved-drawer {
+  position: fixed; right: 0; top: 64px; bottom: 0; z-index: 180;
+  width: 360px; background: var(--white);
+  border-left: 1px solid var(--border);
+  transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.saved-drawer.open { transform: translateX(0); }
+.drawer-header { padding: 20px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.drawer-header h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; }
+.drawer-close { background: var(--sand); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 16px; }
+.saved-item { display: flex; gap: 12px; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); margin-bottom: 10px; cursor: pointer; transition: all .2s; }
+.saved-item:hover { border-color: var(--gold); background: var(--gold-pale); }
+.saved-thumb { width: 72px; height: 56px; border-radius: 7px; overflow: hidden; flex-shrink: 0; }
+.saved-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.saved-info { flex: 1; min-width: 0; }
+.saved-info .name { font-family: 'Playfair Display', serif; font-size: .9rem; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saved-info .loc { font-size: .72rem; color: var(--warm-gray); }
+.saved-info .price { font-size: .8rem; font-weight: 600; color: var(--charcoal); margin-top: 2px; }
+.saved-remove { background: none; border: none; color: var(--warm-gray); cursor: pointer; font-size: .85rem; padding: 4px; transition: color .2s; align-self: flex-start; }
+.saved-remove:hover { color: var(--rust); }
+.drawer-empty { text-align: center; padding: 60px 20px; color: var(--warm-gray); }
+.drawer-empty .icon { font-size: 2.5rem; margin-bottom: 12px; }
+.drawer-empty p { font-size: .85rem; line-height: 1.6; }
+.drawer-footer { padding: 16px; border-top: 1px solid var(--border); }
+.btn-create-account { width: 100%; padding: 13px; background: var(--charcoal); color: var(--white); border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 600; cursor: pointer; transition: background .2s; }
+.btn-create-account:hover { background: var(--gold); color: var(--charcoal); }
+
+/* ── LOGIN MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(28,28,30,.55); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--white); border-radius: 18px; padding: 40px; max-width: 420px; width: 92%; position: relative; animation: modalIn .3s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes modalIn { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-close { position: absolute; top: 16px; right: 16px; background: var(--sand); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center; }
+.modal h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 6px; }
+.modal .subtitle { font-size: .875rem; color: var(--warm-gray); margin-bottom: 24px; }
+.modal-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid var(--border); }
+.modal-tab { flex: 1; padding: 10px; text-align: center; font-size: .875rem; font-weight: 500; color: var(--warm-gray); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; background: none; border-left: none; border-right: none; border-top: none; font-family: 'DM Sans', sans-serif; }
+.modal-tab.active { color: var(--charcoal); border-bottom-color: var(--gold); font-weight: 600; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--charcoal); margin-bottom: 6px; }
+.field input { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--charcoal); outline: none; transition: border-color .2s; }
+.field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.12); }
+.field input::placeholder { color: #bbb; }
+.modal-submit { width: 100%; padding: 14px; background: var(--charcoal); color: var(--white); border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 4px; }
+.modal-submit:hover { background: var(--gold); color: var(--charcoal); }
+.modal-or { display: flex; align-items: center; gap: 12px; color: var(--warm-gray); font-size: .78rem; margin: 16px 0; }
+.modal-or::before, .modal-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 500; transition: all .2s; }
+.social-btn:hover { border-color: var(--charcoal); background: var(--sand); }
+.modal-footer-note { text-align: center; font-size: .72rem; color: var(--warm-gray); margin-top: 16px; }
+.modal-footer-note a { color: var(--charcoal); }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--charcoal); color: var(--white); padding: 12px 22px; border-radius: 30px; font-size: .85rem; font-weight: 500; z-index: 400; transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s; opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.gold { background: var(--gold); color: var(--charcoal); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) { .results-grid:not(.list-view) { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 860px) {
+  .sidebar { display: none; }
+  .results-area { margin-left: 0; padding: 16px; }
+  .results-grid:not(.list-view) { grid-template-columns: 1fr 1fr; }
+  .search-header { gap: 8px; }
+  .results-meta { display: none; }
+  nav { padding: 0 16px; }
+  .nav-saved span:not(.saved-count) { display: none; }
+}
+@media (max-width: 580px) {
+  .results-grid:not(.list-view) { grid-template-columns: 1fr; }
+  .results-grid.list-view .listing-card { flex-direction: column; }
+  .results-grid.list-view .card-img { width: 100%; height: 180px; }
+  .saved-drawer { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">Apt<span>Find</span></a>
+  <div class="nav-search">
+    <svg width="15" height="15" fill="none" stroke="#aaa" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="navSearchInput" placeholder="City, neighborhood, or community…" value="Austin, TX">
+    <button class="nav-search-btn" onclick="runSearch()">Search</button>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-saved" onclick="toggleDrawer()">
+      ♡ <span>Saved</span>
+      <span class="saved-count" id="savedCount">0</span>
+    </button>
+    <button class="nav-login" onclick="openModal('login')">Sign In</button>
+  </div>
+</nav>
+
+<!-- SEARCH HEADER -->
+<div class="search-header">
+  <div class="active-filters" id="activeFilters">
+    <div class="filter-chip" onclick="removeChip(this,'Austin, TX')">Austin, TX <span class="chip-x">×</span></div>
+    <div class="filter-chip" onclick="removeChip(this,'2 Bed')">2 Bed <span class="chip-x">×</span></div>
+    <div class="filter-chip" onclick="removeChip(this,'$1,000–$2,500')">$1,000–$2,500 <span class="chip-x">×</span></div>
+    <div class="filter-chip chip-add" onclick="openModal('filter')">+ Add Filter</div>
+  </div>
+  <span class="results-meta" id="resultsMeta"><strong id="resultsCount">24</strong> communities found</span>
+  <select class="sort-select" onchange="sortResults(this.value)">
+    <option value="featured">Sort: Featured</option>
+    <option value="price-asc">Price: Low to High</option>
+    <option value="price-desc">Price: High to Low</option>
+    <option value="rating">Top Rated</option>
+    <option value="newest">Newest</option>
+  </select>
+  <div class="view-controls">
+    <button class="view-btn active" title="Grid view" onclick="setView('grid',this)">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V2zM1 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V7zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V7zM1 12a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2zm5 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2z"/></svg>
+    </button>
+    <button class="view-btn" title="List view" onclick="setView('list',this)">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
+    </button>
+    <button class="view-btn" title="Map view" onclick="setView('map',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- PAGE BODY -->
+<div class="page-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="filter-section" id="fs-price">
+      <div class="filter-section-header" onclick="toggleSection('fs-price')">
+        <span class="filter-section-title">Price Range</span>
+        <span class="filter-caret">▼</span>
+      </div>
+      <div class="filter-body">
+        <div class="price-range-labels">
+          <span>From <strong id="priceMin">$800</strong></span>
+          <span>To <strong id="priceMax">$3,500</strong></span>
+        </div>
+        <div class="range-track">
+          <div class="range-fill" id="rangeFill"></div>
+          <input type="range" min="0" max="5000" value="800" step="100" id="rangeMin" oninput="updateRange()">
+          <input type="range" min="0" max="5000" value="3500" step="100" id="rangeMax" oninput="updateRange()">
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section" id="fs-beds">
+      <div class="filter-section-header" onclick="toggleSection('fs-beds')">
+        <span class="filter-section-title">Bedrooms</span>
+        <span class="filter-caret">▼</span>
+      </div>
+      <div class="filter-body">
+        <div class="bed-btns">
+          <button class="bed-btn" onclick="toggleBed(this)">Studio</button>
+          <button class="bed-btn" onclick="toggleBed(this)">1 Bed</button>
+          <button class="bed-btn active" onclick="toggleBed(this)">2 Bed</button>
+          <button class="bed-btn" onclick="toggleBed(this)">3 Bed</button>
+          <button class="bed-btn" onclick="toggleBed(this)">4+ Bed</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section" id="fs-type">
+      <div class="filter-section-header" onclick="toggleSection('fs-type')">
+        <span class="filter-section-title">Property Type</span>
+        <span class="filter-caret">▼</span>
+      </div>
+      <div class="filter-body">
+        <div class="amenity-list">
+          <label class="amenity-row checked" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>Apartment Community</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>Luxury High-Rise</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>Garden-Style</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>Townhomes</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>Senior Living (55+)</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>Student Housing</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section" id="fs-amenities">
+      <div class="filter-section-header" onclick="toggleSection('fs-amenities')">
+        <span class="filter-section-title">Amenities</span>
+        <span class="filter-caret">▼</span>
+      </div>
+      <div class="filter-body">
+        <div class="amenity-list">
+          <label class="amenity-row checked" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🐾 Pet Friendly</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🏊 Pool</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🏋️ Fitness Center</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🌇 Rooftop / Views</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>⚡ EV Charging</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>💼 Co-working Space</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🧺 In-Unit Laundry</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🚗 Covered Parking</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🛎️ Concierge</label>
+          <label class="amenity-row" onclick="toggleAmenity(this)"><span class="custom-cb"><span class="cb-check">✓</span></span>🔒 Gated Community</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section" id="fs-rating">
+      <div class="filter-section-header" onclick="toggleSection('fs-rating')">
+        <span class="filter-section-title">Min. Rating</span>
+        <span class="filter-caret">▼</span>
+      </div>
+      <div class="filter-body">
+        <div class="rating-opts">
+          <div class="rating-row" onclick="selectRating(this,4.5)"><span class="rating-stars">★★★★★</span><span>4.5+</span><span class="rating-count">43 listings</span></div>
+          <div class="rating-row active" onclick="selectRating(this,4)"><span class="rating-stars">★★★★☆</span><span>4.0+</span><span class="rating-count">89 listings</span></div>
+          <div class="rating-row" onclick="selectRating(this,3.5)"><span class="rating-stars">★★★½☆</span><span>3.5+</span><span class="rating-count">124 listings</span></div>
+          <div class="rating-row" onclick="selectRating(this,0)"><span class="rating-stars">☆☆☆☆☆</span><span>Any</span><span class="rating-count">186 listings</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section" id="fs-avail">
+      <div class="filter-section-header" onclick="toggleSection('fs-avail')">
+        <span class="filter-section-title">Move-in Date</span>
+        <span class="filter-caret">▼</span>
+      </div>
+      <div class="filter-body">
+        <div class="bed-btns">
+          <button class="bed-btn active" onclick="toggleBed(this)">Now</button>
+          <button class="bed-btn" onclick="toggleBed(this)">30 days</button>
+          <button class="bed-btn" onclick="toggleBed(this)">60 days</button>
+          <button class="bed-btn" onclick="toggleBed(this)">90 days</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="clear-all-btn" onclick="clearFilters()">Clear All Filters</button>
+    </div>
+  </aside>
+
+  <!-- RESULTS -->
+  <main class="results-area" id="resultsArea">
+    <div id="gridWrap">
+      <div class="results-grid" id="resultsGrid">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+    <div class="pagination" id="pagination">
+      <button class="page-btn disabled">←</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" onclick="changePage(this)">2</button>
+      <button class="page-btn" onclick="changePage(this)">3</button>
+      <span style="padding:0 4px;color:var(--warm-gray)">…</span>
+      <button class="page-btn" onclick="changePage(this)">8</button>
+      <button class="page-btn" onclick="changePage(this)">→</button>
+    </div>
+  </main>
+</div>
+
+<!-- SAVED DRAWER -->
+<div class="saved-drawer" id="savedDrawer">
+  <div class="drawer-header">
+    <h3>Saved Listings <span id="drawerCount" style="font-size:.85rem;color:var(--warm-gray);font-weight:400"></span></h3>
+    <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <div class="drawer-empty">
+      <div class="icon">♡</div>
+      <p>Heart listings you like to save them here. Sign in to sync across devices.</p>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-create-account" onclick="openModal('signup')">Create Free Account to Sync →</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="authModal" onclick="handleOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Welcome back</h3>
+    <p class="subtitle" id="modalSubtitle">Sign in to save listings and get personalized recommendations.</p>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="modal-tab" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+    </div>
+    <div id="loginForm">
+      <div class="social-row">
+        <button class="social-btn">
+          <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Google
+        </button>
+        <button class="social-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </button>
+      </div>
+      <div class="modal-or">or</div>
+      <div class="field"><label>Email</label><input type="email" placeholder="you@example.com" id="loginEmail"></div>
+      <div class="field"><label>Password</label><input type="password" placeholder="••••••••" id="loginPass"></div>
+      <button class="modal-submit" onclick="submitAuth('login')">Sign In →</button>
+      <p class="modal-footer-note"><a href="#">Forgot password?</a> · <a href="#">Privacy Policy</a></p>
+    </div>
+    <div id="signupForm" style="display:none">
+      <div class="field"><label>Full Name</label><input type="text" placeholder="Jane Smith"></div>
+      <div class="field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" placeholder="Min. 8 characters"></div>
+      <button class="modal-submit" onclick="submitAuth('signup')">Create Account →</button>
+      <p class="modal-footer-note">By signing up you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── DATA ── */
+const ALL_LISTINGS = [
+  { id:1, name:'The Monarch Residences', city:'Austin, TX', neighborhood:'South Congress', price:1850, beds:2, rating:4.9, reviews:218, tags:['Rooftop Pool','Co-working','Dog Friendly'], badge:'featured', img:'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=500&q=75', avail:'Available Now' },
+  { id:2, name:'Riverview Flats', city:'Austin, TX', neighborhood:'East Riverside', price:1295, beds:1, rating:4.7, reviews:94, tags:['Fitness Center','In-Unit Laundry'], badge:'ad', img:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&q=75', avail:'Available Now' },
+  { id:3, name:'Halcyon Heights', city:'Austin, TX', neighborhood:'Domain', price:2100, beds:2, rating:4.8, reviews:41, tags:['Mountain Views','Concierge'], badge:'new', img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=75', avail:'2 Units Left' },
+  { id:4, name:'The Birch at Midtown', city:'Austin, TX', neighborhood:'Midtown', price:1150, beds:1, rating:4.6, reviews:67, tags:['Pool','Gated'], badge:null, img:'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=500&q=75', avail:'Available Now' },
+  { id:5, name:'Parkside Commons', city:'Austin, TX', neighborhood:'North Loop', price:985, beds:2, rating:4.4, reviews:132, tags:['Pool','Pet-Friendly'], badge:null, img:'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=500&q=75', avail:'Waitlist' },
+  { id:6, name:'The Junction', city:'Austin, TX', neighborhood:'Mueller', price:1750, beds:2, rating:4.8, reviews:88, tags:['Rooftop Deck','Bike Storage'], badge:'featured', img:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=500&q=75', avail:'Available Now' },
+  { id:7, name:'Cornerstone Lofts', city:'Austin, TX', neighborhood:'East Austin', price:1300, beds:1, rating:4.5, reviews:55, tags:['Loft Style','Downtown'], badge:null, img:'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=500&q=75', avail:'Available Now' },
+  { id:8, name:'Skyline & Co.', city:'Austin, TX', neighborhood:'Downtown', price:2400, beds:2, rating:4.9, reviews:176, tags:['Pool','Concierge','EV Charging'], badge:'featured', img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=75', avail:'3 Units Left' },
+  { id:9, name:'Clover Creek', city:'Austin, TX', neighborhood:'Cedar Park', price:1080, beds:3, rating:4.3, reviews:48, tags:['Pet-Friendly','Playground'], badge:null, img:'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=75', avail:'Available Now' },
+  { id:10, name:'The Whitmore', city:'Austin, TX', neighborhood:'West Campus', price:1620, beds:2, rating:4.7, reviews:209, tags:['Rooftop','Co-working','Gym'], badge:'new', img:'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=500&q=75', avail:'Available Now' },
+  { id:11, name:'Meridian House', city:'Austin, TX', neighborhood:'South Lamar', price:1950, beds:2, rating:4.6, reviews:77, tags:['Pool','Smart Home'], badge:null, img:'https://images.unsplash.com/photo-1493663284031-b7e3aaa4cab7?w=500&q=75', avail:'Available Now' },
+  { id:12, name:'The Foundry', city:'Austin, TX', neighborhood:'East 6th', price:1425, beds:1, rating:4.5, reviews:61, tags:['Industrial','Dog Park'], badge:null, img:'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=500&q=75', avail:'Waitlist' },
+];
+
+let savedIds = new Set();
+let currentView = 'grid';
+let filteredListings = [...ALL_LISTINGS];
+
+/* ── RENDER CARDS ── */
+function renderCards(listings) {
+  const grid = document.getElementById('resultsGrid');
+  if (!listings.length) {
+    grid.innerHTML = `<div class="no-results" style="grid-column:1/-1"><div class="icon">🔍</div><h3>No results found</h3><p>Try adjusting your filters or search a different area.</p><button class="nav-login" onclick="clearFilters()" style="margin:0 auto;display:block">Clear Filters</button></div>`;
+    return;
+  }
+  grid.innerHTML = listings.map((l, i) => {
+    const isSaved = savedIds.has(l.id);
+    const badgeHtml = l.badge
+      ? `<div class="card-badges"><span class="badge badge-${l.badge === 'featured' ? 'featured' : l.badge === 'new' ? 'new' : 'ad'}">${l.badge === 'featured' ? '⭐ Featured' : l.badge === 'new' ? 'New' : 'Ad'}</span></div>`
+      : '';
+    const availClass = l.avail === 'Waitlist' ? 'waitlist' : '';
+    return `
+    <div class="listing-card ${isSaved ? 'saved' : ''}" style="animation-delay:${i * 0.05}s" onclick="viewListing(${l.id})">
+      <div class="card-img">
+        <img src="${l.img}" alt="${l.name}" loading="lazy">
+        ${badgeHtml}
+        <button class="save-btn ${isSaved ? 'saved-active' : ''}" onclick="toggleSave(event,${l.id})" title="${isSaved ? 'Unsave' : 'Save'}">${isSaved ? '♥' : '♡'}</button>
+      </div>
+      <div class="card-content">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="card-location">📍 ${l.neighborhood}</span>
+            <span class="card-rating"><span class="star">★</span> ${l.rating} (${l.reviews})</span>
+          </div>
+          <div class="card-name">${l.name}</div>
+          <div class="card-tags">${l.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$${l.price.toLocaleString()}/mo</strong></div>
+            <span class="card-availability ${availClass}">${l.avail}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('resultsCount').textContent = listings.length;
+}
+
+/* ── SAVE LISTING ── */
+function toggleSave(e, id) {
+  e.stopPropagation();
+  const listing = ALL_LISTINGS.find(l => l.id === id);
+  if (savedIds.has(id)) {
+    savedIds.delete(id);
+    showToast(`Removed from saved`);
+  } else {
+    savedIds.add(id);
+    showToast(`♥ Saved: ${listing.name}`, true);
+  }
+  updateSavedCount();
+  updateDrawer();
+  renderCards(filteredListings);
+}
+
+function updateSavedCount() {
+  const count = savedIds.size;
+  document.getElementById('savedCount').textContent = count;
+  document.getElementById('drawerCount').textContent = count ? `(${count})` : '';
+}
+
+function updateDrawer() {
+  const body = document.getElementById('drawerBody');
+  if (!savedIds.size) {
+    body.innerHTML = `<div class="drawer-empty"><div class="icon">♡</div><p>Heart listings you like to save them here. Sign in to sync across devices.</p></div>`;
+    return;
+  }
+  const items = [...savedIds].map(id => {
+    const l = ALL_LISTINGS.find(x => x.id === id);
+    return `<div class="saved-item" onclick="viewListing(${l.id})">
+      <div class="saved-thumb"><img src="${l.img}" alt="${l.name}"></div>
+      <div class="saved-info">
+        <div class="name">${l.name}</div>
+        <div class="loc">📍 ${l.neighborhood}, ${l.city}</div>
+        <div class="price">From $${l.price.toLocaleString()}/mo</div>
+      </div>
+      <button class="saved-remove" onclick="toggleSave(event,${l.id})" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+  body.innerHTML = items;
+}
+
+/* ── DRAWER ── */
+let drawerOpen = false;
+function toggleDrawer() {
+  drawerOpen = !drawerOpen;
+  document.getElementById('savedDrawer').classList.toggle('open', drawerOpen);
+}
+
+/* ── VIEW TOGGLE ── */
+function setView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('resultsGrid');
+  grid.classList.remove('list-view','two-col');
+  const gridWrap = document.getElementById('gridWrap');
+  gridWrap.innerHTML = '';
+
+  if (view === 'list') {
+    grid.classList.add('list-view');
+    gridWrap.appendChild(grid);
+    document.getElementById('pagination').style.display = 'flex';
+  } else if (view === 'map') {
+    const splitDiv = document.createElement('div');
+    splitDiv.className = 'split-view';
+    const cardsDiv = document.createElement('div');
+    cardsDiv.className = 'split-cards';
+    grid.classList.add('two-col');
+    cardsDiv.appendChild(grid);
+    const mapDiv = document.createElement('div');
+    mapDiv.className = 'split-map';
+    mapDiv.innerHTML = `<div class="map-placeholder visible"><div class="map-icon">🗺️</div><h3>Map View</h3><p>Connect a mapping library like Mapbox or Google Maps to power interactive pins here.</p></div>`;
+    splitDiv.appendChild(cardsDiv);
+    splitDiv.appendChild(mapDiv);
+    gridWrap.appendChild(splitDiv);
+    document.getElementById('pagination').style.display = 'none';
+  } else {
+    gridWrap.appendChild(grid);
+    document.getElementById('pagination').style.display = 'flex';
+  }
+}
+
+/* ── FILTERS ── */
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+function toggleBed(btn) {
+  btn.classList.toggle('active');
+  applyFilters();
+}
+function toggleAmenity(el) {
+  el.classList.toggle('checked');
+  applyFilters();
+}
+function selectRating(row, val) {
+  document.querySelectorAll('.rating-row').forEach(r => r.classList.remove('active'));
+  row.classList.add('active');
+  applyFilters();
+}
+function updateRange() {
+  const min = parseInt(document.getElementById('rangeMin').value);
+  const max = parseInt(document.getElementById('rangeMax').value);
+  document.getElementById('priceMin').textContent = '$' + min.toLocaleString();
+  document.getElementById('priceMax').textContent = '$' + max.toLocaleString();
+  const pct1 = (min / 5000) * 100;
+  const pct2 = (max / 5000) * 100;
+  document.getElementById('rangeFill').style.left = pct1 + '%';
+  document.getElementById('rangeFill').style.right = (100 - pct2) + '%';
+  applyFilters();
+}
+
+function applyFilters() {
+  const minPrice = parseInt(document.getElementById('rangeMin').value);
+  const maxPrice = parseInt(document.getElementById('rangeMax').value);
+  const activeBeds = [...document.querySelectorAll('.bed-btn.active')].map(b => b.textContent.trim());
+  const minRating = parseFloat(document.querySelector('.rating-row.active')?.dataset?.val || 0);
+
+  filteredListings = ALL_LISTINGS.filter(l => {
+    const priceOk = l.price >= minPrice && l.price <= maxPrice;
+    const bedLabel = l.beds === 0 ? 'Studio' : `${l.beds} Bed`;
+    const bedsOk = !activeBeds.length || activeBeds.some(b => b.includes(String(l.beds)) || (l.beds === 0 && b === 'Studio'));
+    return priceOk && bedsOk;
+  });
+
+  renderCards(filteredListings);
+}
+
+function clearFilters() {
+  document.querySelectorAll('.bed-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('rangeMin').value = 0;
+  document.getElementById('rangeMax').value = 5000;
+  updateRange();
+  filteredListings = [...ALL_LISTINGS];
+  renderCards(filteredListings);
+  showToast('Filters cleared');
+}
+
+function removeChip(el, label) {
+  el.remove();
+  applyFilters();
+  showToast(`Removed filter: ${label}`);
+}
+
+/* ── SORT ── */
+function sortResults(val) {
+  const sorted = [...filteredListings];
+  if (val === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+  else if (val === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+  else if (val === 'rating') sorted.sort((a,b) => b.rating - a.rating);
+  else if (val === 'newest') sorted.sort((a,b) => b.id - a.id);
+  else sorted.sort((a,b) => (b.badge === 'featured' ? 1 : 0) - (a.badge === 'featured' ? 1 : 0));
+  renderCards(sorted);
+}
+
+/* ── SEARCH ── */
+function runSearch() {
+  const q = document.getElementById('navSearchInput').value.toLowerCase();
+  filteredListings = ALL_LISTINGS.filter(l =>
+    l.name.toLowerCase().includes(q) ||
+    l.city.toLowerCase().includes(q) ||
+    l.neighborhood.toLowerCase().includes(q)
+  );
+  renderCards(filteredListings);
+}
+
+/* ── AUTH MODAL ── */
+function openModal(tab) {
+  document.getElementById('authModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (tab === 'signup') switchTab('signup');
+  else switchTab('login');
+}
+function closeModal() {
+  document.getElementById('authModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleOverlay(e) { if (e.target === document.getElementById('authModal')) closeModal(); }
+function switchTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+}
+function submitAuth(type) {
+  closeModal();
+  showToast(type === 'login' ? '✓ Signed in successfully' : '✓ Account created — welcome!', true);
+  document.querySelector('.nav-login').textContent = 'My Account';
+}
+
+/* ── PAGINATION ── */
+function changePage(btn) {
+  document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo({ top: 120, behavior: 'smooth' });
+}
+
+/* ── VIEW LISTING ── */
+function viewListing(id) {
+  const l = ALL_LISTINGS.find(x => x.id === id);
+  showToast(`Opening ${l.name}…`);
+  // Links to listing page once built: window.location = `listing.html?id=${id}`;
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(msg, isGold = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isGold ? ' gold' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── INIT ── */
+updateRange();
+renderCards(filteredListings);
+
+// Enter key search
+document.getElementById('navSearchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runSearch();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AptFind — Apartment Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sand: #f5f0e8;
+    --cream: #faf8f4;
+    --charcoal: #1c1c1e;
+    --warm-gray: #6b6460;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --rust: #b85c38;
+    --white: #ffffff;
+    --border: #e2ddd6;
+    --card-shadow: 0 2px 20px rgba(28,28,30,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250,248,244,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-logo span { color: var(--gold); }
+
+  .nav-links {
+    display: flex; gap: 32px; align-items: center;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--warm-gray);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--charcoal); }
+
+  .nav-cta {
+    background: var(--charcoal);
+    color: var(--white) !important;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s !important;
+  }
+
+  .nav-cta:hover { background: var(--gold) !important; color: var(--charcoal) !important; }
+
+  /* HERO */
+  .hero {
+    padding: 140px 40px 80px;
+    background: var(--charcoal);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(184,92,56,0.1) 0%, transparent 50%);
+  }
+
+  .hero-inner {
+    max-width: 1100px; margin: 0 auto;
+    position: relative; z-index: 1;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(201,168,76,0.2);
+    border: 1px solid rgba(201,168,76,0.4);
+    color: var(--gold-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    color: var(--white);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero p {
+    color: rgba(255,255,255,0.6);
+    font-size: 1.1rem;
+    max-width: 480px;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  /* SEARCH BOX */
+  .search-box {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 8px 8px 8px 20px;
+    display: flex; align-items: center; gap: 12px;
+    max-width: 680px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  }
+
+  .search-box input {
+    flex: 1;
+    border: none; outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+    background: transparent;
+  }
+
+  .search-box input::placeholder { color: #aaa; }
+
+  .search-divider {
+    width: 1px; height: 28px;
+    background: var(--border);
+  }
+
+  .search-select {
+    border: none; outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--warm-gray);
+    background: transparent;
+    cursor: pointer;
+    padding: 0 8px;
+  }
+
+  .search-btn {
+    background: var(--gold);
+    color: var(--charcoal);
+    border: none;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .search-btn:hover { background: #b8943a; }
+
+  .hero-stats {
+    display: flex; gap: 40px;
+    margin-top: 40px;
+  }
+
+  .stat { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+  .stat strong { display: block; color: var(--white); font-size: 1.4rem; font-weight: 600; }
+
+  /* SECTION COMMON */
+  section { padding: 80px 40px; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+
+  .section-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 40px;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--charcoal);
+  }
+
+  .view-all {
+    color: var(--warm-gray);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .view-all:hover { color: var(--charcoal); border-color: var(--charcoal); }
+
+  /* FEATURED LISTINGS */
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .listing-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s, box-shadow 0.25s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(28,28,30,0.14);
+  }
+
+  .listing-card.featured { grid-row: span 2; }
+
+  .card-image {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .listing-card.featured .card-image { height: 320px; }
+
+  .card-image img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s;
+  }
+
+  .listing-card:hover .card-image img { transform: scale(1.04); }
+
+  .card-badge {
+    position: absolute; top: 14px; left: 14px;
+    background: var(--charcoal);
+    color: var(--white);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+
+  .card-badge.premium {
+    background: var(--gold);
+    color: var(--charcoal);
+  }
+
+  .card-badge.sponsored {
+    background: var(--rust);
+    color: var(--white);
+  }
+
+  .card-save {
+    position: absolute; top: 14px; right: 14px;
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .card-save:hover { background: var(--white); }
+
+  .card-body { padding: 18px 20px 20px; }
+
+  .card-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .card-location {
+    font-size: 0.75rem;
+    color: var(--warm-gray);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .card-rating {
+    font-size: 0.78rem;
+    color: var(--charcoal);
+    font-weight: 600;
+  }
+
+  .card-rating span { color: var(--gold); }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--charcoal);
+    line-height: 1.3;
+  }
+
+  .listing-card.featured .card-name { font-size: 1.35rem; }
+
+  .card-tags {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .tag {
+    background: var(--sand);
+    color: var(--warm-gray);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-price { font-size: 0.88rem; color: var(--warm-gray); }
+  .card-price strong { font-size: 1.05rem; color: var(--charcoal); font-weight: 600; }
+
+  .card-cta {
+    background: var(--sand);
+    color: var(--charcoal);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .card-cta:hover { background: var(--charcoal); color: var(--white); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    position: sticky; top: 68px; z-index: 90;
+  }
+
+  .filter-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; gap: 0; overflow-x: auto;
+  }
+
+  .filter-tab {
+    padding: 16px 22px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--warm-gray);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    background: none;
+    border-left: none; border-right: none; border-top: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-tab:hover { color: var(--charcoal); }
+  .filter-tab.active { color: var(--charcoal); border-bottom-color: var(--gold); font-weight: 600; }
+
+  /* STANDARD LISTINGS GRID */
+  .listings-section { background: var(--sand); }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  /* AD BANNER */
+  .ad-banner {
+    background: linear-gradient(135deg, var(--charcoal) 0%, #2d2a25 100%);
+    border-radius: 12px;
+    padding: 30px 36px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 40px;
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .ad-banner-text { color: var(--white); }
+  .ad-banner-text p { color: rgba(255,255,255,0.5); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+  .ad-banner-text h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 6px; }
+  .ad-banner-text span { color: rgba(255,255,255,0.6); font-size: 0.875rem; }
+
+  .ad-banner-btn {
+    background: var(--gold);
+    color: var(--charcoal);
+    border: none; border-radius: 8px;
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  .ad-banner-btn:hover { background: #b8943a; }
+
+  /* PRICING */
+  .pricing-section { background: var(--white); }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .pricing-card {
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 36px 32px;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .pricing-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 8px 32px rgba(201,168,76,0.12);
+  }
+
+  .pricing-card.popular {
+    border-color: var(--gold);
+    background: var(--charcoal);
+    color: var(--white);
+  }
+
+  .popular-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--charcoal);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .pricing-tier {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .pricing-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .pricing-period {
+    font-size: 0.82rem;
+    color: var(--warm-gray);
+    margin-bottom: 28px;
+  }
+
+  .pricing-card.popular .pricing-period { color: rgba(255,255,255,0.5); }
+
+  .pricing-features {
+    list-style: none;
+    margin-bottom: 32px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .pricing-features li {
+    font-size: 0.875rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .pricing-features li::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .pricing-card.popular .pricing-features li { color: rgba(255,255,255,0.8); }
+
+  .pricing-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid var(--charcoal);
+    background: transparent;
+    color: var(--charcoal);
+  }
+
+  .pricing-card.popular .pricing-btn {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--charcoal);
+  }
+
+  .pricing-btn:hover {
+    background: var(--charcoal);
+    color: var(--white);
+  }
+
+  .pricing-card.popular .pricing-btn:hover {
+    background: #b8943a;
+    border-color: #b8943a;
+  }
+
+  /* CITY BROWSE */
+  .cities-section { background: var(--cream); }
+
+  .cities-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+  }
+
+  .city-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .city-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px rgba(201,168,76,0.12);
+    transform: translateY(-2px);
+  }
+
+  .city-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+
+  .city-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .city-count {
+    font-size: 0.72rem;
+    color: var(--warm-gray);
+  }
+
+  /* CTA SECTION */
+  .cta-section {
+    background: var(--charcoal);
+    padding: 100px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(201,168,76,0.1) 0%, transparent 70%);
+  }
+
+  .cta-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--white);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+    position: relative; z-index: 1;
+  }
+
+  .cta-section h2 em { color: var(--gold); font-style: italic; }
+
+  .cta-section p {
+    color: rgba(255,255,255,0.55);
+    font-size: 1rem;
+    max-width: 460px;
+    margin: 0 auto 36px;
+    position: relative; z-index: 1;
+  }
+
+  .cta-btns {
+    display: flex; gap: 14px; justify-content: center;
+    position: relative; z-index: 1;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--charcoal);
+    padding: 15px 32px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: #b8943a; }
+
+  .btn-outline {
+    border: 2px solid rgba(255,255,255,0.25);
+    color: var(--white);
+    padding: 13px 32px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    display: inline-block;
+  }
+
+  .btn-outline:hover { border-color: rgba(255,255,255,0.7); }
+
+  /* FOOTER */
+  footer {
+    background: #111110;
+    color: rgba(255,255,255,0.5);
+    padding: 60px 40px 32px;
+  }
+
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+
+  .footer-brand .nav-logo { color: var(--white); }
+  .footer-brand p {
+    font-size: 0.85rem;
+    margin-top: 12px;
+    line-height: 1.7;
+    max-width: 220px;
+  }
+
+  .footer-col h4 {
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .footer-col ul a {
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+  }
+
+  .footer-col ul a:hover { color: rgba(255,255,255,0.85); }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 24px;
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-inner > * {
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .hero-inner > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-inner > *:nth-child(2) { animation-delay: 0.2s; }
+  .hero-inner > *:nth-child(3) { animation-delay: 0.3s; }
+  .hero-inner > *:nth-child(4) { animation-delay: 0.4s; }
+  .hero-inner > *:nth-child(5) { animation-delay: 0.5s; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(28,28,30,0.6);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 460px; width: 90%;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--sand); border: none; border-radius: 50%;
+    width: 32px; height: 32px;
+    cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; margin-bottom: 6px;
+  }
+
+  .modal p { font-size: 0.875rem; color: var(--warm-gray); margin-bottom: 24px; }
+
+  .modal input, .modal select {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .modal input:focus, .modal select:focus { border-color: var(--gold); }
+
+  .modal .btn-primary { width: 100%; text-align: center; font-size: 1rem; padding: 15px; }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 110px 20px 60px; }
+    section { padding: 60px 20px; }
+    .featured-grid { grid-template-columns: 1fr; }
+    .listing-card.featured { grid-row: span 1; }
+    .listing-card.featured .card-image { height: 220px; }
+    .listings-grid { grid-template-columns: 1fr; }
+    .cities-grid { grid-template-columns: repeat(3, 1fr); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .search-box { flex-wrap: wrap; padding: 14px; }
+    .search-divider { display: none; }
+    .hero-stats { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Apt<span>Find</span></a>
+  <ul class="nav-links">
+    <li><a href="#browse">Browse</a></li>
+    <li><a href="#cities">Cities</a></li>
+    <li><a href="#pricing">List Your Property</a></li>
+    <li><a href="#pricing">Advertise</a></li>
+    <li><a href="#contact" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">🏙️ The Apartment Industry Directory</div>
+    <h1>Find Your <em>Next</em> Apartment Community</h1>
+    <p>Browse thousands of apartment communities across the country. Compare amenities, pricing, and availability — all in one place.</p>
+
+    <div class="search-box">
+      <svg width="18" height="18" fill="none" stroke="#aaa" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search by city, neighborhood, or community name...">
+      <div class="search-divider"></div>
+      <select class="search-select">
+        <option>Any Price</option>
+        <option>Under $1,000</option>
+        <option>$1,000 – $1,500</option>
+        <option>$1,500 – $2,500</option>
+        <option>$2,500+</option>
+      </select>
+      <div class="search-divider"></div>
+      <select class="search-select">
+        <option>Any Size</option>
+        <option>Studio</option>
+        <option>1 Bed</option>
+        <option>2 Bed</option>
+        <option>3+ Bed</option>
+      </select>
+      <button class="search-btn" onclick="showModal()">Search</button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat"><strong>12,400+</strong>Apartment Communities</div>
+      <div class="stat"><strong>280+</strong>Cities Covered</div>
+      <div class="stat"><strong>94K+</strong>Monthly Renters</div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="filter-tab active" onclick="setTab(this)">All Listings</button>
+    <button class="filter-tab" onclick="setTab(this)">Luxury</button>
+    <button class="filter-tab" onclick="setTab(this)">Pet-Friendly</button>
+    <button class="filter-tab" onclick="setTab(this)">Short-Term</button>
+    <button class="filter-tab" onclick="setTab(this)">New Construction</button>
+    <button class="filter-tab" onclick="setTab(this)">Senior Living</button>
+    <button class="filter-tab" onclick="setTab(this)">Student Housing</button>
+    <button class="filter-tab" onclick="setTab(this)">Income-Restricted</button>
+  </div>
+</div>
+
+<!-- FEATURED LISTINGS -->
+<section id="browse">
+  <div class="section-inner">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Sponsored Placements</div>
+        <h2 class="section-title">Featured Communities</h2>
+      </div>
+      <a href="#" class="view-all">View all listings →</a>
+    </div>
+
+    <div class="featured-grid">
+      <!-- Featured card (large) -->
+      <a href="#" class="listing-card featured" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80" alt="The Monarch Residences">
+          <div class="card-badge premium">⭐ Featured</div>
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Austin, TX · South Congress</span>
+            <span class="card-rating"><span>★</span> 4.9 (218)</span>
+          </div>
+          <div class="card-name">The Monarch Residences</div>
+          <div class="card-tags">
+            <span class="tag">Rooftop Pool</span>
+            <span class="tag">Co-working</span>
+            <span class="tag">Dog Friendly</span>
+            <span class="tag">EV Charging</span>
+          </div>
+          <p style="font-size:0.85rem;color:#888;margin-bottom:14px;">Modern luxury apartments in the heart of South Congress with stunning city views, resort-style amenities, and walkable access to top dining.</p>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$1,850/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="listing-card" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&q=80" alt="Riverview Flats">
+          <div class="card-badge sponsored">Ad</div>
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Nashville, TN</span>
+            <span class="card-rating"><span>★</span> 4.7 (94)</span>
+          </div>
+          <div class="card-name">Riverview Flats</div>
+          <div class="card-tags">
+            <span class="tag">Fitness Center</span>
+            <span class="tag">In-Unit Laundry</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$1,295/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="listing-card" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80" alt="Halcyon Heights">
+          <div class="card-badge">New</div>
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Denver, CO</span>
+            <span class="card-rating"><span>★</span> 4.8 (41)</span>
+          </div>
+          <div class="card-name">Halcyon Heights</div>
+          <div class="card-tags">
+            <span class="tag">Mountain Views</span>
+            <span class="tag">Concierge</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$2,100/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 4 -->
+      <a href="#" class="listing-card" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&q=80" alt="The Birch">
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Charlotte, NC</span>
+            <span class="card-rating"><span>★</span> 4.6 (67)</span>
+          </div>
+          <div class="card-name">The Birch at Midtown</div>
+          <div class="card-tags">
+            <span class="tag">Pool</span>
+            <span class="tag">Gated</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$1,150/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ALL LISTINGS -->
+<section class="listings-section">
+  <div class="section-inner">
+
+    <!-- Ad Banner -->
+    <div class="ad-banner">
+      <div class="ad-banner-text">
+        <p>Sponsored · ApartmentLoan.com</p>
+        <h3>Finance Your Next Investment Property</h3>
+        <span>Rates from 6.5% · Pre-qualify in 60 seconds · No hard credit pull</span>
+      </div>
+      <button class="ad-banner-btn" onclick="showModal()">Learn More →</button>
+    </div>
+
+    <div class="section-header">
+      <div>
+        <div class="section-label">Browse Directory</div>
+        <h2 class="section-title">All Communities</h2>
+      </div>
+      <a href="#" class="view-all">Sort & filter →</a>
+    </div>
+
+    <div class="listings-grid">
+      <!-- Listing 1 -->
+      <a href="#" class="listing-card" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=400&q=80" alt="Parkside Commons">
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Phoenix, AZ</span>
+            <span class="card-rating"><span>★</span> 4.4 (132)</span>
+          </div>
+          <div class="card-name">Parkside Commons</div>
+          <div class="card-tags"><span class="tag">Pool</span><span class="tag">Pet-Friendly</span></div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$985/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Listing 2 -->
+      <a href="#" class="listing-card" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&q=80" alt="The Junction">
+          <div class="card-badge premium">⭐ Featured</div>
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Seattle, WA</span>
+            <span class="card-rating"><span>★</span> 4.8 (88)</span>
+          </div>
+          <div class="card-name">The Junction</div>
+          <div class="card-tags"><span class="tag">Rooftop Deck</span><span class="tag">Bike Storage</span></div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$1,750/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+
+      <!-- Listing 3 -->
+      <a href="#" class="listing-card" onclick="showModal(); return false;">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=400&q=80" alt="Cornerstone Lofts">
+          <div class="card-save">♡</div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-location">📍 Atlanta, GA</span>
+            <span class="card-rating"><span>★</span> 4.5 (55)</span>
+          </div>
+          <div class="card-name">Cornerstone Lofts</div>
+          <div class="card-tags"><span class="tag">Loft Style</span><span class="tag">Downtown</span></div>
+          <div class="card-footer">
+            <div class="card-price">From <strong>$1,300/mo</strong></div>
+            <button class="card-cta">Request Info</button>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CITY BROWSE -->
+<section class="cities-section" id="cities">
+  <div class="section-inner">
+    <div class="section-header">
+      <div>
+        <div class="section-label">Explore by Market</div>
+        <h2 class="section-title">Browse by City</h2>
+      </div>
+      <a href="#" class="view-all">All 280+ cities →</a>
+    </div>
+
+    <div class="cities-grid">
+      <a href="#" class="city-card"><div class="city-emoji">🌆</div><div class="city-name">New York</div><div class="city-count">3,400+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🌴</div><div class="city-name">Los Angeles</div><div class="city-count">2,100+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🎸</div><div class="city-name">Austin</div><div class="city-count">890+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🏔️</div><div class="city-name">Denver</div><div class="city-count">640+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🎵</div><div class="city-name">Nashville</div><div class="city-count">520+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🌹</div><div class="city-name">Charlotte</div><div class="city-count">410+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">☀️</div><div class="city-name">Phoenix</div><div class="city-count">780+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🌧️</div><div class="city-name">Seattle</div><div class="city-count">560+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🍑</div><div class="city-name">Atlanta</div><div class="city-count">490+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🌊</div><div class="city-name">Miami</div><div class="city-count">730+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🎲</div><div class="city-name">Las Vegas</div><div class="city-count">320+ listings</div></a>
+      <a href="#" class="city-card"><div class="city-emoji">🌉</div><div class="city-name">Chicago</div><div class="city-count">1,200+ listings</div></a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:52px;">
+      <div class="section-label" style="display:block;">For Property Managers</div>
+      <h2 class="section-title">List Your Community</h2>
+      <p style="color:var(--warm-gray);margin-top:10px;max-width:420px;margin-left:auto;margin-right:auto;">Reach thousands of qualified renters actively searching in your market. Cancel anytime.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Basic -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Basic</div>
+        <div class="pricing-price">$49</div>
+        <div class="pricing-period">per month, per community</div>
+        <ul class="pricing-features">
+          <li>Standard directory listing</li>
+          <li>Up to 6 photos</li>
+          <li>Contact form (lead capture)</li>
+          <li>Basic amenity tags</li>
+          <li>City search visibility</li>
+        </ul>
+        <button class="pricing-btn" onclick="showModal()">Get Started</button>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="pricing-tier">Professional</div>
+        <div class="pricing-price">$149</div>
+        <div class="pricing-period">per month, per community</div>
+        <ul class="pricing-features">
+          <li>Priority search placement</li>
+          <li>Up to 30 photos + virtual tour</li>
+          <li>Lead notification emails</li>
+          <li>Analytics dashboard</li>
+          <li>Featured badge on listing</li>
+          <li>Social sharing tools</li>
+        </ul>
+        <button class="pricing-btn" onclick="showModal()">Get Started</button>
+      </div>
+
+      <!-- Premium -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Premium</div>
+        <div class="pricing-price">$349</div>
+        <div class="pricing-period">per month, per community</div>
+        <ul class="pricing-features">
+          <li>Homepage featured placement</li>
+          <li>Top of city search results</li>
+          <li>Unlimited photos & floor plans</li>
+          <li>Branded landing page</li>
+          <li>CRM lead integration</li>
+          <li>Dedicated account manager</li>
+          <li>Monthly performance report</li>
+        </ul>
+        <button class="pricing-btn" onclick="showModal()">Contact Sales</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <h2>Ready to <em>Grow</em> Your Occupancy?</h2>
+  <p>Join hundreds of property managers using AptFind to connect with qualified renters every day.</p>
+  <div class="cta-btns">
+    <a href="#" class="btn-primary" onclick="showModal(); return false;">List Your Property</a>
+    <a href="#" class="btn-outline" onclick="showModal(); return false;">Advertise with Us</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">Apt<span>Find</span></a>
+        <p>The premier online directory for apartment communities across the United States.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Renters</h4>
+        <ul>
+          <li><a href="#">Browse Listings</a></li>
+          <li><a href="#">Search by City</a></li>
+          <li><a href="#">Saved Homes</a></li>
+          <li><a href="#">Renter Resources</a></li>
+          <li><a href="#">Moving Checklist</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Property Managers</h4>
+        <ul>
+          <li><a href="#">List Your Community</a></li>
+          <li><a href="#">Pricing Plans</a></li>
+          <li><a href="#">Advertise</a></li>
+          <li><a href="#">Lead Management</a></li>
+          <li><a href="#">Analytics</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 AptFind. All rights reserved.</span>
+      <span>Made for the apartment industry</span>
+    </div>
+  </div>
+</footer>
+
+<!-- LEAD CAPTURE MODAL -->
+<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>Get More Info</h3>
+    <p>Fill out the form below and we'll connect you with the leasing team right away.</p>
+    <input type="text" placeholder="Your name">
+    <input type="email" placeholder="Email address">
+    <input type="tel" placeholder="Phone number (optional)">
+    <select>
+      <option value="">Move-in timeframe...</option>
+      <option>ASAP / Within 30 days</option>
+      <option>1–3 months</option>
+      <option>3–6 months</option>
+      <option>Just browsing</option>
+    </select>
+    <button class="btn-primary" style="display:block;width:100%;margin-top:4px;" onclick="submitLead()">Send Request</button>
+  </div>
+</div>
+
+<script>
+  function setTab(el) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function showModal() {
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modal')) closeModal();
+  }
+
+  function submitLead() {
+    const modal = document.getElementById('modal');
+    modal.querySelector('.modal').innerHTML = `
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:3rem;margin-bottom:16px;">✅</div>
+        <h3 style="font-family:'Playfair Display',serif;margin-bottom:8px;">Request Sent!</h3>
+        <p style="color:var(--warm-gray);font-size:0.9rem;">The leasing team will reach out within 24 hours. Check your email for confirmation.</p>
+        <button class="btn-primary" style="margin-top:24px;padding:12px 28px;" onclick="closeModal()">Close</button>
+      </div>`;
+  }
+
+  // Animate cards on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = `fadeUp 0.5s ease ${i * 0.07}s both`;
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.listing-card, .city-card, .pricing-card').forEach(el => {
+    el.style.opacity = '0';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
